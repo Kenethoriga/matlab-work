@@ -1,78 +1,142 @@
-MATH TEMPLE RUN - Milestone 2 prototype
+================================================================================
+MATH TEMPLE RUN — Milestone 2 Prototype
 SCS3301 Computer Graphics, University of Nairobi
 Authors: <add group member names>
+================================================================================
 
-HOW TO RUN (MATLAB, no toolboxes needed)
-  1. Open MATLAB and set the Current Folder to this folder.
-  2. Type:   run_project
-  3. Type the answer to the puzzle on the board and press Enter.
-  Slow computer?   run_project('lite')   (coarser rock, no glow or embers)
-  To save the six M2 screenshots automatically:   run_project('shots')
-  (they are written to the screenshots folder)
+HOW TO RUN (MATLAB — no toolboxes required)
+--------------------------------------------------------------------------------
+1. Open MATLAB and set the Current Folder to this project directory.
+2. Run:
+       run_project
+3. Walk Amani toward the gate/sign, type the answer to the riddle, and press Enter.
+
+Optional launch modes:
+  - Lightweight mode (slower PCs; coarser rock, no halos/embers):
+        run_project('lite')
+  - Automated Milestone 2 screenshots (saved to the screenshots/ folder):
+        run_project('shots')
 
 WINDOW SIZE
-  The game window is 960 x 540 pixels. To change it, edit W and Hgt near the top of run_project.m.
+--------------------------------------------------------------------------------
+Default window size is 960 x 540 pixels. To change it, edit W and Hgt near the
+top of run_project.m.
 
 CONTROLS
-  Arrows or WASD   walk the explorer (the camera follows). It walks freely until it
-                   reaches the sign, then stops. Type the answer to go on.
-  0-9 and -        type your answer        Backspace  delete
-  Enter            check the answer        R          new puzzle, gate closes
-  V                switch camera (player/perspective, top/orthographic, side/orthographic)
-  P                save a screenshot       Esc        quit
+--------------------------------------------------------------------------------
+  W A S D / Arrow Keys   Walk the explorer (camera follows smoothly)
+  0-9 and -              Type your numeric answer
+  Backspace              Delete last character
+  Enter                  Skip/start intro, or submit your answer
+  R                      Generate a new riddle and reset the gate
+  V                      Cycle camera view:
+                           1. Follow (perspective)
+                           2. Top map (orthographic)
+                           3. Side view (orthographic)
+  P                      Save a snapshot
+  Esc                    Quit the game
 
-WHAT THE PROTOTYPE SHOWS (Milestone 2 checklist)
-  Scene modelled         build_scene.m: rock corridor, floor tiles, beams, six torches,
-                         wooden double gate, puzzle board, floating crystal.
-                         Built from patch / surf primitives (prim_*.m) and light().
-  Own matrices           mtx_translate, mtx_scale, mtx_rotx, mtx_roty, mtx_rotz, mtx_apply.
-                         They move the flames (scale), the crystal (rotate + translate)
-                         and the whole gate. No makehgtform or hgtransform is used.
-  Moving character       an explorer you walk with the arrow keys or WASD. Body is the root;
-                         arms and legs swing about the shoulders and hips (same hierarchy idea).
-                         The closed gate blocks the way, an open gate lets you walk through.
-  3-level hierarchy      update_scene.m:  world = M_gate * M_leaf * M_bolt
-                           level 1  gate frame, placed in the corridor
-                           level 2  door leaf, turns about its hinge: T(h) * Rz(a) * T(-h)
-                           level 3  bolt, slides along the leaf (moves with the leaf)
-  One working control    typing the answer + Enter. Right answer: the bolt slides back, the
-                         leaves swing open, the camera moves through. Wrong answer: red
-                         message, the gate rattles, hint after two misses.
-  Also already in        perspective and orthographic cameras (V key), puzzle numbers are
-                         random each run.
+MILESTONE 2 CHECKLIST (What the Prototype Demonstrates)
+--------------------------------------------------------------------------------
+  1. 3D Scene Modelling (build_scene.m)
+     Built entirely from patch / surf primitives (prim_*.m) and MATLAB light():
+     - Rough procedural rock corridor & ceiling (rock_noise.m) with warm-torch
+       vs. cool-shadow color grading (bake_color.m).
+     - Stone tiled floor with a royal crimson runner carpet and woven gold trim.
+     - Carved cylindrical temple columns with stepped plinths, gold rings, and
+       layered capitals, plus overhead stone beams and bronze torch sconces.
+     - Monumental wooden & iron double gate with a stepped lintel, gilded
+       keystone, gold-bezel glowing crimson rune, recessed door panels, and
+       gold studs.
+     - Floating cyan rune crystal, flickering multi-layer torch flames,
+       drifting embers, and a glowing portal beyond the gate.
+
+  2. Custom 4x4 Transformation Matrices (mtx_*.m)
+     All transforms use our own homogeneous matrices (mtx_translate, mtx_scale,
+     mtx_rotx, mtx_roty, mtx_rotz, mtx_apply) — no makehgtform or hgtransform.
+     Used to animate flames, the floating crystal, the explorer's limbs, and
+     the temple gate.
+
+  3. Articulated Explorer Character (Amani)
+     Hierarchical body rig (body -> thigh -> shin; body -> upper arm -> forearm)
+     with bending knees and elbows, walking animation, and collision against
+     the closed gate. Styled with a royal teal tunic, crimson scarf, leather
+     belt with gold buckle, cross-body strap, feathered explorer hat, leather
+     backpack with gold clasps and bedroll, and cuffed boots/gloves.
+
+  4. 3-Level Transform Hierarchy (update_scene.m)
+     The temple gate uses:   world = M_gate * M_leaf * M_bolt
+       - Level 1: Gate frame placed in the corridor.
+       - Level 2: Door leaves pivoting around their hinges: T(h) * Rz(a) * T(-h).
+       - Level 3: Sliding iron/gold bolts moving with each door leaf.
+
+  5. Working Interactive Control & Feedback
+     Typing an answer and pressing Enter checks the riddle:
+       - Correct: bolt slides back, gate leaves swing open, seal turns green,
+         "THE SEAL IS BROKEN!" banner appears, and Amani can walk through.
+       - Wrong: warning message appears, gate rattles, and a step-by-step
+         hint unlocks after two misses.
+
+  6. Cameras & Randomization
+     Switchable perspective and orthographic cameras (V key) and randomized
+     vector dot-product riddles every run (puzzle_new.m).
 
 STORY
-  The Temple of Numbers: you play Amani, an explorer chasing the Crystal of Zero through
-  chambers sealed by gates that open only for the right answer. An opening screen tells
-  the story (Enter skips the typing, then starts). Each gate has a name and a whispered
-  riddle on the puzzle card. Chamber 1 is The Gate of Direction (vectors); chamber 2, the
-  Hall of Determinants, and chamber 3 come in the final version.
+--------------------------------------------------------------------------------
+In "The Temple of Numbers," you play as Amani, an explorer following a torch-lit
+corridor in search of the Crystal of Zero. An animated opening screen introduces
+the tale (press Enter to skip typing and begin). Each chamber is sealed by a
+named gate with a whispered math riddle. Chamber I is The Gate of Direction
+(Vectors); Chambers II–IV (Determinants, Transformations, and the Hidden Vault)
+are planned for the final submission.
 
-INTERFACE
-  Carved-gold temple style: corner frames, a ribbon title bar, four Roman-numeral seals,
-  GLORY (score), attempts and time, a quest line, a riddle card at the sign with the
-  answer box, message banners, a "seal broken" banner and a key guide. Glory: 500 per
-  riddle, minus 50 for each wrong answer (minimum 100). dotchar.m supplies the small dot
-  separator (Octave falls back to a star).
+USER INTERFACE (hud_create.m, hud_update.m)
+--------------------------------------------------------------------------------
+Carved-gold & dark-stone temple HUD:
+  - Soft screen vignette, gold corner brackets, and top/bottom gold trim bars.
+  - Title bar with drop shadow, active chamber name, quest prompt, GLORY score
+    (500 per riddle, -50 per miss, minimum 100), attempts counter, and timer.
+  - Four Roman-numeral diamond seals (I–IV); the active seal pulses gold and
+    turns emerald green when broken.
+  - Ancient gradient stone-tablet riddle card on the left with a recessed
+    cyan-trimmed answer input slot (the duplicate right-side 3D board is hidden
+    to keep the view uncluttered).
+  - Centered carved-gold bottom control bar with diamond accents.
+  - dotchar.m provides the centred dot separator (falls back to '*' in Octave).
 
-SPEED AND LOOK
-  Shapes are merged into a few big patches (mesh_add.m, mesh_patch.m), only the parts
-  that moved are redrawn, and the loop runs up to 60 frames per second. The explorer has
-  bending knees and elbows (body -> thigh -> shin, upper arm -> forearm), the camera
-  glides after it, and the scene has a red carpet, stone blocks, rivets, glowing flames,
-  drifting embers, a soft shadow and a dark vignette.
+PERFORMANCE OPTIMIZATION
+--------------------------------------------------------------------------------
+  - Static geometry is merged into single patches (mesh_add.m, mesh_patch.m)
+    to minimize MATLAB draw calls.
+  - Vectorized vertex math (bake_color.m, mtx_apply.m) avoids unnecessary
+    array allocations.
+  - Dirty-checked HUD updates (hud_update.m) only touch graphics properties
+    when values actually change, keeping animation smooth up to 60 FPS.
 
-FILES
-  run_project.m   main script (game loop, keys, screenshots)
-  build_scene.m   models the scene          update_scene.m  moves it every frame
-  view_set.m      the three cameras         hud_create.m / hud_update.m   on-screen interface (top bar, puzzle card, banners, key guide)
-  puzzle_new.m    random vector puzzle      bake_color.m, rock_noise.m  look of the cave
-  mtx_*.m         our own 4x4 matrices      prim_*.m        box, cylinder, sphere, capsule, crystal;  mesh_*.m  merge shapes
+PROJECT FILES
+--------------------------------------------------------------------------------
+  run_project.m               Main entry point (game loop, input, screenshots)
+  build_scene.m               Builds corridor, columns, gate, crystal & explorer
+  update_scene.m              Per-frame animation & 3-level gate transforms
+  view_set.m                  Perspective & orthographic camera setups
+  hud_create.m / hud_update.m Carved-gold temple HUD & stone riddle tablet
+  puzzle_new.m                Random vector dot-product puzzle generator
+  bake_color.m, rock_noise.m  Procedural cave geometry & warm/cool lighting
+  mtx_*.m                     Custom 4x4 homogeneous transform matrices
+  prim_*.m                    3D primitives (box, cylinder, sphere, capsule,
+                              crystal, surface of revolution)
+  mesh_add.m, mesh_patch.m    Mesh merging and patch rendering helpers
+  dotchar.m                   Cross-platform separator character helper
 
-STILL TO DO FOR THE FINAL (not expected at M2)
-  Chambers 2 and 3 with their own gates, determinant and transformation puzzles, the
-  challenge-mode chamber, the 60 s VideoWriter video, a second on-screen control.
+PLANNED FOR FINAL SUBMISSION (Beyond M2)
+--------------------------------------------------------------------------------
+  - Chambers II, III, and IV (Determinants, Transformations, and Hidden Vault)
+  - Background ambient temple music & sound effects
+  - Additional on-screen control
+  - 60-second VideoWriter showcase recording
 
-AI AND EXTERNAL CODE
-  This prototype was written with help from an AI assistant (Claude). We will mark that
-  in the final report, and every member must be able to explain their own part.
+AI & EXTERNAL ASSISTANCE DISCLOSURE
+--------------------------------------------------------------------------------
+Parts of this prototype (code refactoring, visual polish, and UI refinement)
+were developed with assistance from AI tools. This will be acknowledged in the
+final report, and every group member can explain their respective modules.
