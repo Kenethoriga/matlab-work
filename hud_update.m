@@ -8,7 +8,8 @@ function hud_update(H, G)
 
     ch = 1;
     if isfield(G, 'chamber'), ch = G.chamber; end
-    rn = {'I', 'II', 'III', 'IV'};
+    rn  = {'I', 'II', 'III', 'IV'};
+    mid = dotchar();
 
     %% 1. Story Opening Screen (Chamber 1 & Chamber 2)
     vis = 'off'; if G.intro, vis = 'on'; end
@@ -16,8 +17,22 @@ function hud_update(H, G)
     if G.intro
         if ch == 2 && isfield(H, 'storyText2')
             txt = H.storyText2;
+            if isfield(H, 'introTitle')
+                setv(H.introTitle,   'String', 'C H A M B E R   I I  :  T H E   I N F E R N O');
+                setv(H.introTitleSh, 'String', 'C H A M B E R   I I  :  T H E   I N F E R N O');
+                setv(H.introTitle,   'Color',  [1.00 0.62 0.24]);
+                setv(H.introSub,     'String', ['THE CRUCIBLE OF DETERMINANTS   ' mid '   2x2 MATRICES']);
+                setv(H.introHint,    'String', 'PRESS  [ENTER]  TO  ENTER  THE  INFERNO');
+            end
         else
             txt = H.storyText;
+            if isfield(H, 'introTitle')
+                setv(H.introTitle,   'String', 'T H E   T E M P L E   O F   N U M B E R S');
+                setv(H.introTitleSh, 'String', 'T H E   T E M P L E   O F   N U M B E R S');
+                setv(H.introTitle,   'Color',  [0.98 0.83 0.46]);
+                setv(H.introSub,     'String', ['CHAPTER I   ' mid '   THE GATE OF DIRECTION']);
+                setv(H.introHint,    'String', 'PRESS  [ENTER]  TO  BEGIN  YOUR  JOURNEY');
+            end
         end
         n = min(numel(txt), floor(G.intro_t * 48));
         setv(H.introBody, 'String', txt(1:n));
@@ -26,8 +41,6 @@ function hud_update(H, G)
         setv(H.introHint, 'Visible', v);
         return
     end
-
-    mid = dotchar();
 
     %% 2. Top Bar & Chamber Seals
     if solved
@@ -57,7 +70,7 @@ function hud_update(H, G)
             pulse = 0.85 + 0.15 * sin(G.frame * 0.12);
             setv(H.pip(k), 'FaceColor', min(1, gold * pulse));
         else
-            setv(H.pip(k), 'FaceColor', [0.22 0.20 0.22]);
+            setv(H.pip(k), 'FaceColor', [0.48 0.42 0.34]);
         end
     end
 

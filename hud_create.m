@@ -1,12 +1,12 @@
 function H = hud_create(fig)
-% HUD_CREATE  Sleek ancient carved-stone & gold temple HUD with gradient
-%             tablet dialogue box, Chamber I & II stories, and gold key guide.
+% HUD_CREATE  High-contrast ancient carved-stone & gold temple HUD.
 
-    gold   = [0.96 0.80 0.44];
-    goldD  = [0.55 0.42 0.19];
-    cyan   = [0.56 0.90 1.00];
-    dark   = [0.04 0.035 0.045];
-    mid    = dotchar();
+    gold      = [0.98 0.83 0.46];
+    goldD     = [0.62 0.48 0.22];
+    parchment = [0.99 0.95 0.86];
+    cyan      = [0.62 0.93 1.00];
+    dark      = [0.04 0.035 0.045];
+    mid       = dotchar();
 
     H.ax = axes('Parent', fig, 'Position', [0 0 1 1], 'XLim', [0 1], 'YLim', [0 1], ...
         'Visible', 'off', 'HitTest', 'off');
@@ -20,129 +20,130 @@ function H = hud_create(fig)
         'AlphaData', a * 0.72, 'AlphaDataMapping', 'none', 'HitTest', 'off');
 
     %% 2. Top Ribbon, Bottom Bar & Corner Brackets
-    rectp(H.ax, 0, 0.878, 1, 0.122, dark, 0.68, 'none');
-    rectp(H.ax, 0, 0.922, 1, 0.078, dark, 0.38, 'none');
-    rectp(H.ax, 0, 0,     1, 0.072, dark, 0.72, 'none');
-    line(H.ax, [0 1], [0.878 0.878], 'Color', gold * 0.88, 'LineWidth', 1.6);
-    line(H.ax, [0 1], [0.871 0.871], 'Color', goldD,       'LineWidth', 0.7);
-    line(H.ax, [0 1], [0.072 0.072], 'Color', goldD,       'LineWidth', 1.0);
+    rectp(H.ax, 0, 0.872, 1, 0.128, dark, 0.78, 'none');
+    rectp(H.ax, 0, 0.922, 1, 0.078, dark, 0.40, 'none');
+    rectp(H.ax, 0, 0,     1, 0.076, dark, 0.82, 'none');
+    line(H.ax, [0 1], [0.872 0.872], 'Color', gold * 0.90, 'LineWidth', 1.6);
+    line(H.ax, [0 1], [0.865 0.865], 'Color', goldD,       'LineWidth', 0.8);
+    line(H.ax, [0 1], [0.076 0.076], 'Color', goldD,       'LineWidth', 1.1);
 
-    corner(H.ax, 0.008, 0.012,  1,  1, gold * 0.85, 0.036, 0.062);
-    corner(H.ax, 0.992, 0.012, -1,  1, gold * 0.85, 0.036, 0.062);
-    corner(H.ax, 0.008, 0.988,  1, -1, gold * 0.85, 0.036, 0.062);
-    corner(H.ax, 0.992, 0.988, -1, -1, gold * 0.85, 0.036, 0.062);
+    corner(H.ax, 0.008, 0.012,  1,  1, gold * 0.88, 0.036, 0.062);
+    corner(H.ax, 0.992, 0.012, -1,  1, gold * 0.88, 0.036, 0.062);
+    corner(H.ax, 0.008, 0.988,  1, -1, gold * 0.88, 0.036, 0.062);
+    corner(H.ax, 0.992, 0.988, -1, -1, gold * 0.88, 0.036, 0.062);
 
-    %% 3. Title, Subtitle & Quest
-    heads(end+1) = text(H.ax, 0.0225, 0.9515, 'MATH TEMPLE RUN', 'Color', [0 0 0], ...
-        'FontSize', 19, 'FontWeight', 'bold', 'Interpreter', 'none');
-    H.title = text(H.ax, 0.020, 0.954, 'MATH TEMPLE RUN', 'Color', gold, ...
-        'FontSize', 19, 'FontWeight', 'bold', 'Interpreter', 'none');
+    %% 3. Ancient Carved Title, Subtitle & Quest
+    heads(end+1) = text(H.ax, 0.0225, 0.9515, 'M A T H   T E M P L E   R U N', 'Color', [0 0 0], ...
+        'FontSize', 17, 'FontWeight', 'bold', 'Interpreter', 'none');
+    H.title = text(H.ax, 0.020, 0.954, 'M A T H   T E M P L E   R U N', 'Color', gold, ...
+        'FontSize', 17, 'FontWeight', 'bold', 'Interpreter', 'none');
     heads(end+1) = H.title;
 
-    H.sub   = text(H.ax, 0.020, 0.906, '', 'Color', [0.90 0.85 0.74], ...
-        'FontSize', 10.5, 'FontAngle', 'italic', 'Interpreter', 'none');
-    H.quest = text(H.ax, 0.020, 0.844, '', 'Color', gold, ...
-        'FontSize', 11, 'FontWeight', 'bold', 'Interpreter', 'none');
+    H.sub   = text(H.ax, 0.020, 0.902, '', 'Color', parchment, ...
+        'FontSize', 11.5, 'FontWeight', 'bold', 'Interpreter', 'none');
+    H.quest = text(H.ax, 0.020, 0.840, '', 'Color', gold, ...
+        'FontSize', 12, 'FontWeight', 'bold', 'Interpreter', 'none');
 
-    %% 4. Chamber Seals (Top Center)
+    %% 4. Chamber Seals (Top Center — high-contrast stone & Roman numerals)
     H.pip = gobjects(1, 4);
     px = [0.425 0.475 0.525 0.575];
     rn = {'I', 'II', 'III', 'IV'};
     for k = 1:4
-        H.pip(k) = diamond(H.ax, px(k), 0.948, 0.021, 0.036, [0.22 0.20 0.22], goldD);
-        heads(end+1) = text(H.ax, px(k), 0.948, rn{k}, 'Color', [0.06 0.05 0.06], ...
-            'FontSize', 8.5, 'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none');
+        H.pip(k) = diamond(H.ax, px(k), 0.948, 0.022, 0.038, [0.48 0.42 0.34], gold);
+        heads(end+1) = text(H.ax, px(k), 0.948, rn{k}, 'Color', [0.05 0.04 0.04], ...
+            'FontSize', 10, 'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none');
     end
-    heads(end+1) = text(H.ax, 0.5, 0.898, 'THE FOUR SEALS  (IV is the hidden vault)', ...
-        'Color', [0.74 0.68 0.56], 'FontSize', 7.5, 'HorizontalAlignment', 'center', 'Interpreter', 'none');
+    heads(end+1) = text(H.ax, 0.5, 0.892, 'THE FOUR SEALS  (IV IS THE HIDDEN VAULT)', ...
+        'Color', [0.88 0.80 0.64], 'FontSize', 8.8, 'FontWeight', 'bold', ...
+        'HorizontalAlignment', 'center', 'Interpreter', 'none');
 
     %% 5. Score, Stats & Camera Label
-    H.score = text(H.ax, 0.98, 0.953, '', 'Color', [1.0 0.90 0.55], 'FontSize', 16, ...
+    H.score = text(H.ax, 0.98, 0.953, '', 'Color', [1.0 0.90 0.52], 'FontSize', 16.5, ...
         'FontWeight', 'bold', 'HorizontalAlignment', 'right', 'Interpreter', 'none');
     heads(end+1) = H.score;
-    H.stats = text(H.ax, 0.98, 0.908, '', 'Color', [0.88 0.83 0.74], 'FontSize', 10.5, ...
-        'HorizontalAlignment', 'right', 'Interpreter', 'none');
-    H.view  = text(H.ax, 0.98, 0.098, '', 'Color', cyan, 'FontSize', 9.5, ...
-        'FontAngle', 'italic', 'HorizontalAlignment', 'right', 'Interpreter', 'none');
+    H.stats = text(H.ax, 0.98, 0.903, '', 'Color', parchment, 'FontSize', 11.5, ...
+        'FontWeight', 'bold', 'HorizontalAlignment', 'right', 'Interpreter', 'none');
+    H.view  = text(H.ax, 0.98, 0.102, '', 'Color', cyan, 'FontSize', 10.5, ...
+        'FontWeight', 'bold', 'HorizontalAlignment', 'right', 'Interpreter', 'none');
 
     %% 6. Message & "Seal Broken" Banners
-    H.msg = text(H.ax, 0.5, 0.80, '', 'Color', [0.98 0.94 0.84], 'FontSize', 12.5, 'FontWeight', 'bold', ...
-        'HorizontalAlignment', 'center', 'Interpreter', 'none', 'BackgroundColor', [0.08 0.07 0.06], ...
-        'EdgeColor', gold * 0.80, 'Margin', 9, 'LineWidth', 1.2, 'Visible', 'off');
+    H.msg = text(H.ax, 0.5, 0.80, '', 'Color', parchment, 'FontSize', 13, 'FontWeight', 'bold', ...
+        'HorizontalAlignment', 'center', 'Interpreter', 'none', 'BackgroundColor', [0.07 0.06 0.05], ...
+        'EdgeColor', gold * 0.85, 'Margin', 9, 'LineWidth', 1.3, 'Visible', 'off');
     heads(end+1) = H.msg;
 
-    H.bannerShadow = text(H.ax, 0.503, 0.637, 'THE SEAL IS BROKEN!', 'Color', [0 0 0], ...
-        'FontSize', 31, 'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none', 'Visible', 'off');
-    H.banner = text(H.ax, 0.500, 0.640, 'THE SEAL IS BROKEN!', 'Color', gold, ...
-        'FontSize', 31, 'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none', 'Visible', 'off');
+    H.bannerShadow = text(H.ax, 0.503, 0.637, 'T H E   S E A L   I S   B R O K E N !', 'Color', [0 0 0], ...
+        'FontSize', 27, 'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none', 'Visible', 'off');
+    H.banner = text(H.ax, 0.500, 0.640, 'T H E   S E A L   I S   B R O K E N !', 'Color', gold, ...
+        'FontSize', 27, 'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none', 'Visible', 'off');
     heads(end+1) = H.banner; heads(end+1) = H.bannerShadow;
 
     H.walk = text(H.ax, 0.5, 0.135, ['Approach the sign, seeker   ' mid '   W A S D or Arrow Keys'], ...
-        'Color', [0.96 0.94 0.88], 'FontSize', 12, 'FontWeight', 'bold', 'HorizontalAlignment', 'center', ...
-        'Interpreter', 'none', 'BackgroundColor', [0.08 0.07 0.06], 'EdgeColor', gold * 0.75, 'Margin', 9, 'LineWidth', 1.2);
+        'Color', parchment, 'FontSize', 12.5, 'FontWeight', 'bold', 'HorizontalAlignment', 'center', ...
+        'Interpreter', 'none', 'BackgroundColor', [0.07 0.06 0.05], 'EdgeColor', gold * 0.80, 'Margin', 9, 'LineWidth', 1.3);
 
     %% 7. Clean Ancient Question & Answer Dialogue Box (Left Panel)
-    x0 = 0.024; y0 = 0.110; w = 0.286; h = 0.460;
+    x0 = 0.022; y0 = 0.108; w = 0.296; h = 0.472;
     cx = x0 + w / 2;
     P  = gobjects(1, 0);
 
-    P(end+1) = tablet(H.ax, x0 + 0.005, y0 - 0.009, w, h, 0.012, [0 0 0], 0.45, 'none', 0.5);
+    P(end+1) = tablet(H.ax, x0 + 0.005, y0 - 0.009, w, h, 0.012, [0 0 0], 0.50, 'none', 0.5);
     P(end+1) = grad_tablet(H.ax, x0, y0, w, h, 0.012, ...
-        [0.13 0.11 0.095], [0.055 0.05 0.05], 0.94, gold * 0.85, 1.5);
+        [0.14 0.12 0.10], [0.055 0.05 0.05], 0.96, gold * 0.90, 1.6);
     P(end+1) = tablet(H.ax, x0 + 0.008, y0 + 0.011, w - 0.016, h - 0.022, ...
-        0.008, 'none', 0.0, goldD * 0.8, 0.7);
+        0.008, 'none', 0.0, goldD * 0.85, 0.8);
 
-    H.cHead = text(H.ax, cx, y0 + h - 0.040, '', 'Color', gold, 'FontSize', 12.5, ...
+    H.cHead = text(H.ax, cx, y0 + h - 0.042, '', 'Color', gold, 'FontSize', 13.5, ...
         'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none');
     heads(end+1) = H.cHead; P(end+1) = H.cHead;
 
-    H.cChamber = text(H.ax, cx, y0 + h - 0.072, '', 'Color', cyan, 'FontSize', 9.5, ...
+    H.cChamber = text(H.ax, cx, y0 + h - 0.076, '', 'Color', cyan, 'FontSize', 10.5, ...
         'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none'); P(end+1) = H.cChamber;
 
-    H.cWhisper = text(H.ax, cx, y0 + h - 0.102, '', 'Color', [0.82 0.75 0.62], 'FontSize', 8.5, ...
-        'FontAngle', 'italic', 'HorizontalAlignment', 'center', 'Interpreter', 'none'); P(end+1) = H.cWhisper;
+    H.cWhisper = text(H.ax, cx, y0 + h - 0.108, '', 'Color', [0.90 0.82 0.68], 'FontSize', 9.5, ...
+        'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none'); P(end+1) = H.cWhisper;
 
-    yd = y0 + h - 0.128;
-    P(end+1) = line(H.ax, [x0 + 0.024, cx - 0.016], [yd yd], 'Color', goldD, 'LineWidth', 0.9);
-    P(end+1) = line(H.ax, [cx + 0.016, x0 + w - 0.024], [yd yd], 'Color', goldD, 'LineWidth', 0.9);
+    yd = y0 + h - 0.136;
+    P(end+1) = line(H.ax, [x0 + 0.024, cx - 0.016], [yd yd], 'Color', goldD, 'LineWidth', 1.0);
+    P(end+1) = line(H.ax, [cx + 0.016, x0 + w - 0.024], [yd yd], 'Color', goldD, 'LineWidth', 1.0);
     P(end+1) = diamond(H.ax, cx, yd, 0.006, 0.010, gold, gold);
 
-    H.cA = text(H.ax, cx, y0 + 0.285, '', 'Color', [0.99 0.97 0.93], 'FontSize', 17.5, ...
+    H.cA = text(H.ax, cx, y0 + 0.290, '', 'Color', [1.0 0.98 0.92], 'FontSize', 18.5, ...
         'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none'); P(end+1) = H.cA;
-    H.cB = text(H.ax, cx, y0 + 0.236, '', 'Color', [0.99 0.97 0.93], 'FontSize', 17.5, ...
+    H.cB = text(H.ax, cx, y0 + 0.238, '', 'Color', [1.0 0.98 0.92], 'FontSize', 18.5, ...
         'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none'); P(end+1) = H.cB;
-    H.cAsk = text(H.ax, cx, y0 + 0.186, '', 'Color', gold * 0.95, 'FontSize', 10.5, ...
+    H.cAsk = text(H.ax, cx, y0 + 0.186, '', 'Color', gold, 'FontSize', 11.5, ...
         'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none'); P(end+1) = H.cAsk;
 
     P(end+1) = text(H.ax, cx, y0 + 0.146, 'TYPE ANSWER  &  PRESS ENTER', ...
-        'Color', [0.65 0.78 0.85], 'FontSize', 7.5, 'FontWeight', 'bold', ...
+        'Color', [0.76 0.88 0.94], 'FontSize', 9.0, 'FontWeight', 'bold', ...
         'HorizontalAlignment', 'center', 'Interpreter', 'none');
 
-    P(end+1) = grad_tablet(H.ax, x0 + 0.028, y0 + 0.068, w - 0.056, 0.064, 0.006, ...
-        [0.03 0.055 0.08], [0.055 0.095 0.135], 0.96, cyan * 0.9, 1.5);
+    P(end+1) = grad_tablet(H.ax, x0 + 0.024, y0 + 0.066, w - 0.048, 0.066, 0.006, ...
+        [0.03 0.055 0.08], [0.06 0.10 0.14], 0.97, cyan * 0.95, 1.6);
 
-    H.cAns = text(H.ax, cx, y0 + 0.100, '', 'Color', [1 1 1], 'FontSize', 18, ...
+    H.cAns = text(H.ax, cx, y0 + 0.099, '', 'Color', [1.0 0.98 0.92], 'FontSize', 18.5, ...
         'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none'); P(end+1) = H.cAns;
 
-    H.cHint = text(H.ax, cx, y0 + 0.034, '', 'Color', [0.95 0.80 0.48], 'FontSize', 8.3, ...
-        'FontAngle', 'italic', 'HorizontalAlignment', 'center', 'Interpreter', 'none'); P(end+1) = H.cHint;
+    H.cHint = text(H.ax, cx, y0 + 0.032, '', 'Color', [0.98 0.84 0.50], 'FontSize', 9.5, ...
+        'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none'); P(end+1) = H.cHint;
 
     H.cardParts = P;
 
     %% 8. Fancy Carved-Gold Bottom Key Guide
-    line(H.ax, [0 1], [0.066 0.066], 'Color', goldD * 0.65, 'LineWidth', 0.6);
-    diamond(H.ax, 0.045, 0.035, 0.006, 0.011, gold, goldD);
-    diamond(H.ax, 0.955, 0.035, 0.006, 0.011, gold, goldD);
+    line(H.ax, [0 1], [0.068 0.068], 'Color', goldD * 0.70, 'LineWidth', 0.7);
+    diamond(H.ax, 0.030, 0.036, 0.006, 0.011, gold, goldD);
+    diamond(H.ax, 0.970, 0.036, 0.006, 0.011, gold, goldD);
 
     sep = ['   ' mid '   '];
-    H.help = text(H.ax, 0.5, 0.035, ...
+    H.help = text(H.ax, 0.5, 0.036, ...
         ['MOVE [W A S D]' sep 'ANSWER [0-9]' sep 'CONFIRM [ENTER]' sep ...
          'CAMERA [V]' sep 'NEW RIDDLE [R]' sep 'SNAPSHOT [P]' sep 'LEAVE [ESC]'], ...
-        'Color', [0.94 0.82 0.54], 'FontSize', 9.5, 'FontWeight', 'bold', ...
+        'Color', [0.98 0.88 0.62], 'FontSize', 10.2, 'FontWeight', 'bold', ...
         'HorizontalAlignment', 'center', 'Interpreter', 'none');
     heads(end+1) = H.help;
 
-    %% 9. Story Opening Screens (Chamber I & Chamber II)
+    %% 9. Story Opening Screens (Chamber I & Chamber II — Rich Temple Scroll)
     nl = char(10);
     H.storyText = ['Long ago, the mathematicians of the Rift built a temple of stone' nl ...
         'and sealed every chamber behind a gate that listens for one thing:' nl ...
@@ -160,34 +161,68 @@ function H = hud_create(fig)
         'Cross the diagonals, subtract with care, and claim the second seal.'];
 
     I = gobjects(1, 0);
-    I(end+1) = rectp(H.ax, 0, 0, 1, 1, [0.012 0.010 0.015], 0.95, 'none');
-    I(end+1) = tablet(H.ax, 0.060, 0.070, 0.880, 0.860, 0.020, 'none', 0, gold,  2.0);
-    I(end+1) = tablet(H.ax, 0.072, 0.090, 0.856, 0.820, 0.015, 'none', 0, goldD, 0.8);
-    I(end+1) = text(H.ax, 0.5, 0.835, 'THE TEMPLE OF NUMBERS', 'Color', gold, 'FontSize', 30, ...
-        'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none');
-    heads(end+1) = I(end);
-    I(end+1) = line(H.ax, [0.22 0.46], [0.775 0.775], 'Color', goldD, 'LineWidth', 1.1);
-    I(end+1) = line(H.ax, [0.54 0.78], [0.775 0.775], 'Color', goldD, 'LineWidth', 1.1);
-    I(end+1) = diamond(H.ax, 0.5, 0.775, 0.012, 0.022, gold, gold);
-    I(end+1) = text(H.ax, 0.5, 0.740, 'A Tale of Numbers and Stone', 'Color', [0.88 0.80 0.64], ...
-        'FontSize', 13, 'FontAngle', 'italic', 'HorizontalAlignment', 'center', 'Interpreter', 'none');
-    heads(end+1) = I(end);
-    H.introBody = text(H.ax, 0.5, 0.680, '', 'Color', [0.94 0.92 0.86], 'FontSize', 14, ...
+    % Solid dark backdrop (prevents HUD bleed-through)
+    I(end+1) = rectp(H.ax, 0, 0, 1, 1, [0.015 0.012 0.016], 0.99, 'none');
+
+    % Outer monumental gold frame + corner diamonds
+    I(end+1) = grad_tablet(H.ax, 0.055, 0.065, 0.890, 0.870, 0.022, ...
+        [0.095 0.078 0.068], [0.032 0.026 0.030], 0.98, gold, 2.2);
+    I(end+1) = tablet(H.ax, 0.070, 0.085, 0.860, 0.830, 0.016, 'none', 0, goldD, 0.9);
+    I(end+1) = diamond(H.ax, 0.095, 0.880, 0.008, 0.015, gold, gold);
+    I(end+1) = diamond(H.ax, 0.905, 0.880, 0.008, 0.015, gold, gold);
+    I(end+1) = diamond(H.ax, 0.095, 0.120, 0.008, 0.015, gold, gold);
+    I(end+1) = diamond(H.ax, 0.905, 0.120, 0.008, 0.015, gold, gold);
+
+    % Dynamic Title (with drop shadow) & Chapter Subtitle
+    H.introTitleSh = text(H.ax, 0.5025, 0.842, 'T H E   T E M P L E   O F   N U M B E R S', ...
+        'Color', [0 0 0], 'FontSize', 25, 'FontWeight', 'bold', ...
+        'HorizontalAlignment', 'center', 'Interpreter', 'none');
+    H.introTitle = text(H.ax, 0.500, 0.845, 'T H E   T E M P L E   O F   N U M B E R S', ...
+        'Color', gold, 'FontSize', 25, 'FontWeight', 'bold', ...
+        'HorizontalAlignment', 'center', 'Interpreter', 'none');
+    heads(end+1) = H.introTitleSh; heads(end+1) = H.introTitle;
+
+    % Ornamental divider
+    I(end+1) = line(H.ax, [0.18 0.455], [0.785 0.785], 'Color', goldD, 'LineWidth', 1.2);
+    I(end+1) = line(H.ax, [0.545 0.82], [0.785 0.785], 'Color', goldD, 'LineWidth', 1.2);
+    I(end+1) = diamond(H.ax, 0.5, 0.785, 0.012, 0.022, gold, gold);
+    I(end+1) = diamond(H.ax, 0.468, 0.785, 0.005, 0.009, goldD, goldD);
+    I(end+1) = diamond(H.ax, 0.532, 0.785, 0.005, 0.009, goldD, goldD);
+
+    H.introSub = text(H.ax, 0.5, 0.735, ['CHAPTER I   ' mid '   THE GATE OF DIRECTION'], ...
+        'Color', [0.94 0.82 0.58], 'FontSize', 12.5, 'FontWeight', 'bold', ...
+        'HorizontalAlignment', 'center', 'Interpreter', 'none');
+    heads(end+1) = H.introSub;
+
+    % Recessed inner stone scroll tablet for the story body
+    I(end+1) = grad_tablet(H.ax, 0.135, 0.245, 0.730, 0.455, 0.014, ...
+        [0.12 0.10 0.088], [0.065 0.055 0.052], 0.95, goldD * 0.9, 1.1);
+
+    H.introBody = text(H.ax, 0.5, 0.655, '', 'Color', parchment, 'FontSize', 15, ...
         'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', 'Interpreter', 'none');
-    heads(end+1) = H.introBody;
-    H.introHint = text(H.ax, 0.5, 0.130, 'Press Enter to begin your journey', 'Color', cyan, ...
-        'FontSize', 13, 'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none');
-    H.intro = [I, H.introBody, H.introHint];
+
+    % Styled "Press Enter" button pill at bottom
+    I(end+1) = grad_tablet(H.ax, 0.30, 0.125, 0.40, 0.072, 0.008, ...
+        [0.05 0.085 0.11], [0.03 0.05 0.07], 0.96, cyan * 0.85, 1.3);
+    H.introHint = text(H.ax, 0.5, 0.161, 'PRESS  [ENTER]  TO  BEGIN  YOUR  JOURNEY', ...
+        'Color', cyan, 'FontSize', 11.5, 'FontWeight', 'bold', ...
+        'HorizontalAlignment', 'center', 'Interpreter', 'none');
+    heads(end+1) = H.introHint;
+
+    H.intro = [I, H.introTitleSh, H.introTitle, H.introSub, H.introBody, H.introHint];
     set(H.intro, 'Visible', 'off');
 
-    %% 10. Typography
+    %% 10. Crisp Ancient Temple Typography (no thin Garamond)
     try
         fonts = listfonts;
-        body  = pickfont(fonts, {'Segoe UI', 'Helvetica Neue', 'Helvetica', 'Arial'});
-        fancy = pickfont(fonts, {'Palatino Linotype', 'Georgia', 'Cambria', 'Book Antiqua', 'Times New Roman'});
+        ancient = pickfont(fonts, { ...
+            'Cinzel', 'Trajan Pro', 'Georgia', 'Palatino Linotype', 'Book Antiqua', 'Times New Roman'});
+        bodySerif = pickfont(fonts, { ...
+            'Georgia', 'Palatino Linotype', 'Cambria', 'Book Antiqua', 'Times New Roman'});
+
         t = findall(H.ax, 'Type', 'text');
-        if ~isempty(body),  set(t, 'FontName', body); end
-        if ~isempty(fancy), set(heads(ishandle(heads)), 'FontName', fancy); end
+        if ~isempty(bodySerif), set(t, 'FontName', bodySerif); end
+        if ~isempty(ancient),   set(heads(ishandle(heads)), 'FontName', ancient); end
     catch
     end
 end
