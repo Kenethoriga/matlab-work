@@ -55,8 +55,11 @@ while ishandle(fig)
     if isempty(G), break; end
     G = step_state(G, dt);
 
-    % ---- Transition from Chamber I to Chamber II (The Inferno) ----
+    % ---- Smooth Cinematic Transition: Chamber I -> Chamber II (The Inferno) ----
     if G.chamber == 1 && G.opening && G.py >= 14.5
+        [fadeBox, fadeTxt] = fade_out(fig, H, ['CHAMBER II  ' dotchar() '  THE INFERNO']);
+        if ~ishandle(fig), break; end
+
         G.chamber = 2;
         cla(ax);
         S = build_chamber2(ax, lite);
@@ -74,6 +77,12 @@ while ishandle(fig)
         end
         G.msg = 'Walk the obsidian path to the Inferno Gate.';
         G.msg_col = [1 0.55 0.25]; G.msg_t = 99;
+
+        setappdata(fig, 'G', G);
+        draw_frame(ax, S, H, G, t);
+        fade_in(fig, fadeBox, fadeTxt);
+        tprev = toc(t0);   % reset dt after transition pause
+        continue;
     end
 
     G.frame = G.frame + 1;
@@ -263,6 +272,31 @@ else
     if G.wrong >= 2, G.msg = 'Still silent. A faint voice offers a clue below.'; end
     G.msg_col = [1 0.4 0.35]; G.msg_t = 5;
 end
+end
+
+% ------------------------------------------------------------------------
+function [boxH, txtH] = fade_out(fig, H, label)
+    boxH = patch('Parent', H.ax, 'XData', [0 1 1 0], 'YData', [0 0 1 1], ...
+        'FaceColor', [0.02 0.01 0.01], 'FaceAlpha', 0, 'EdgeColor', 'none', 'HitTest', 'off');
+    txtH = text(H.ax, 0.5, 0.5, label, 'Color', [1.0 0.72 0.28], 'FontSize', 22, ...
+        'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none', 'Visible', 'off');
+    for a = linspace(0, 1, 18)
+        if ~ishandle(fig), return; end
+        set(boxH, 'FaceAlpha', a);
+        if a > 0.5, set(txtH, 'Visible', 'on'); end
+        drawnow; pause(0.02);
+    end
+    pause(0.45);
+end
+
+function fade_in(fig, boxH, txtH)
+    if ishandle(txtH), delete(txtH); end
+    for a = linspace(1, 0, 16)
+        if ~ishandle(fig), return; end
+        if ishandle(boxH), set(boxH, 'FaceAlpha', a); end
+        drawnow; pause(0.02);
+    end
+    if ishandle(boxH), delete(boxH); end
 end
 
 % ------------------------------------------------------------------------
