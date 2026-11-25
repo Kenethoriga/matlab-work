@@ -262,7 +262,7 @@ function S = build_chamber2(ax, lite)
         'EdgeColor', [1.0 0.90 0.38], 'LineWidth', 1.0, 'FaceLighting', 'none', 'FaceAlpha', 0.95, 'Clipping', 'off');
 
     %% 11. Explorer Character (Amani)
-    S = add_explorer(ax, S);
+    S = build_explorer(ax, S);
 
     %% 12. Rising Volcanic Embers & Brazier Halos
     ne = 90;
