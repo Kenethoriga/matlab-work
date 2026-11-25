@@ -1,15 +1,9 @@
 function run_project(mode)
-% RUN_PROJECT  Math Temple Run - Milestone 2 prototype (SCS3301 Computer Graphics)
+% RUN_PROJECT  Math Temple Run - Milestone 2+ (Chambers I & II)
 %
 %   run_project            play the game (type the answer, press Enter)
 %   run_project('lite')    lighter graphics for a slow computer
 %   run_project('shots')   save screenshots into the screenshots folder and exit
-%
-% What this prototype shows (Milestone 2):
-%   * a modelled scene: torch-lit temple corridor, gate, puzzle panel, crystal
-%   * our own 4x4 matrices (mtx_*.m) moving objects: flames, crystal, the gate
-%   * a 3-level hierarchy: gate frame -> door leaf (turns about its hinge) -> bolt
-%   * one working control: typing the answer and pressing Enter opens the gate
 %
 % Authors: <add group member names>
 % Course:  SCS3301 Computer Graphics, University of Nairobi
@@ -20,29 +14,31 @@ here = fileparts(mfilename('fullpath'));
 addpath(here);
 rng('shuffle');
 
-fig = figure('Name', 'Math Temple Run - M2 prototype', 'NumberTitle', 'off', ...
+fig = figure('Name', 'Math Temple Run', 'NumberTitle', 'off', ...
     'Color', [0.02 0.015 0.012], 'MenuBar', 'none', 'ToolBar', 'none', 'Units', 'pixels');
-% window size: 960 x 540 pixels, centred (change W and Hgt here to resize)
 W = 960; Hgt = 540;
 scr = get(0, 'ScreenSize');
 set(fig, 'Position', [max(1, (scr(3) - W) / 2), max(1, (scr(4) - Hgt) / 2), W, Hgt]);
 set(fig, 'Units', 'normalized');
 try, set(fig, 'GraphicsSmoothing', 'on'); catch, end
+
 ax = axes('Parent', fig, 'Position', [0 0 1 1]);
-S = build_scene(ax, strcmp(mode, 'lite'));
+lite = strcmp(mode, 'lite');
+S = build_scene(ax, lite);
 H = hud_create(fig);
 
+G.chamber = 1;
 G.open_t = 0; G.opening = false; G.view = 1;
 G.input = ''; G.wrong = 0; G.shake_t = 0;
 G.px = 0; G.py = -4; G.heading = 0; G.phase = 0; G.moving = false; G.cheer = false;
-G.at_sign = false;      % true when the explorer has walked up to the puzzle sign
-G.score = 0; G.tries = 0; G.time = 0;   % shown in the top bar
-G.intro = true; G.intro_t = 0;          % story opening screen
-G.intro_len = numel(H.storyText);       % characters in the story text
-G.keys = [0 0 0 0];     % held keys: up, down, left, right
-G.camx = 0; G.camy = -10.5; G.frame = 0;   % smooth follow camera, frame counter
+G.at_sign = false;
+G.score = 0; G.tries = 0; G.time = 0;
+G.intro = true; G.intro_t = 0;
+G.intro_len = numel(H.storyText);
+G.keys = [0 0 0 0];
+G.camx = 0; G.camy = -10.5; G.frame = 0;
 G.msg = 'Follow the torches to the sign, seeker.'; G.msg_col = [1 0.85 0.5]; G.msg_t = 99;
-G.puzzle = puzzle_new();
+G.puzzle = puzzle_new(1);
 setappdata(fig, 'G', G);
 
 if strcmp(mode, 'shots')
@@ -58,22 +54,44 @@ while ishandle(fig)
     G = getappdata(fig, 'G');
     if isempty(G), break; end
     G = step_state(G, dt);
+
+    % ---- Transition from Chamber I to Chamber II (The Inferno) ----
+    if G.chamber == 1 && G.opening && G.py >= 14.5
+        G.chamber = 2;
+        cla(ax);
+        S = build_chamber2(ax, lite);
+        G.open_t = 0; G.opening = false; G.at_sign = false;
+        G.input = ''; G.wrong = 0; G.shake_t = 0;
+        G.px = 0; G.py = -4; G.heading = 0; G.phase = 0; G.moving = false; G.cheer = false;
+        G.camx = 0; G.camy = -10.5;
+        G.keys = [0 0 0 0];
+        G.puzzle = puzzle_new(2);
+        G.intro = true; G.intro_t = 0;
+        if isfield(H, 'storyText2')
+            G.intro_len = numel(H.storyText2);
+        else
+            G.intro_len = numel(H.storyText);
+        end
+        G.msg = 'Walk the obsidian path to the Inferno Gate.';
+        G.msg_col = [1 0.55 0.25]; G.msg_t = 99;
+    end
+
     G.frame = G.frame + 1;
     setappdata(fig, 'G', G);
     draw_frame(ax, S, H, G, t);
+
     if isfield(G, 'shot') && ~isempty(G.shot)
         save_shot(fig, here, G.shot);
         G.shot = ''; setappdata(fig, 'G', G);
     end
     drawnow;
-    spare = 1 / 60 - (toc(t0) - t);        % cap at about 60 frames per second
+    spare = 1 / 60 - (toc(t0) - t);
     if spare > 0.002, pause(spare); end
 end
 end
 
 % ------------------------------------------------------------------------
 function G = step_state(G, dt)
-% advance the gate animation and the timers
 if G.opening
     G.open_t = min(1, G.open_t + dt / 3.4);
 else
@@ -84,31 +102,37 @@ if G.intro, G.intro_t = G.intro_t + dt; end
 if ~G.opening && ~G.intro, G.time = G.time + dt; end
 G.cheer = G.opening && G.open_t < 1;
 
-% --- smooth follow camera: glides toward a spot behind the explorer ---
+% Smooth follow camera
 k = min(1, 4 * dt);
 G.camx = G.camx + (0.6 * G.px - G.camx) * k;
 G.camy = G.camy + (G.py - 6.5 - G.camy) * k;
 
-% --- walk the explorer (held keys), with simple collision ---
-d = [G.keys(4) - G.keys(3), G.keys(1) - G.keys(2)];     % [dx dy]
+% Walk the explorer
+d = [G.keys(4) - G.keys(3), G.keys(1) - G.keys(2)];
 G.moving = any(d ~= 0);
 if G.moving
     d = d / norm(d);
     G.px = G.px + 4.2 * d(1) * dt;
     G.py = G.py + 4.2 * d(2) * dt;
     target = atan2(-d(1), d(2));
-    diff = mod(target - G.heading + pi, 2*pi) - pi;      % shortest turn
+    diff = mod(target - G.heading + pi, 2*pi) - pi;
     G.heading = G.heading + diff * min(1, 12 * dt);
     G.phase = G.phase + 9 * dt;
 end
-G.px = max(-3.8, min(3.8, G.px));
 
-% --- the explorer walks freely, but stops at the sign until the puzzle is solved ---
+% Keep explorer inside corridor (and on obsidian walkway in Chamber II)
+if G.chamber == 2
+    G.px = max(-1.65, min(1.65, G.px));
+else
+    G.px = max(-3.8, min(3.8, G.px));
+end
+
+% Stop at the sign until the puzzle is solved
 STOP_Y = 3.0;
 if ~G.opening
     if G.py >= STOP_Y
         G.py = STOP_Y;
-        G.moving = false;                                % stop walking on the spot
+        G.moving = false;
         if ~G.at_sign
             G.at_sign = true;
             G.msg = 'The gate whispers. Speak your answer, then press Enter.';
@@ -116,20 +140,28 @@ if ~G.opening
         end
     end
 else
-    G.at_sign = false;                                   % solved: free to walk on
+    G.at_sign = false;
 end
+
 if G.open_t < 0.9
-    G.py = max(-8.5, min(8.6, G.py));                    % the closed gate blocks the way
+    G.py = max(-8.5, min(8.6, G.py));
 else
     G.py = max(-8.5, min(17, G.py));
     if G.py > 9.3 && G.py < 10.7
-        G.px = max(-2.2, min(2.2, G.px));               % squeeze through the doorway
+        G.px = max(-2.2, min(2.2, G.px));
     end
 end
+
 if G.py > 11 && G.opening && G.msg_t > 50
-    G.msg = 'Beyond lies Chamber II, the Hall of Determinants. (Final version)';
-    G.msg_col = [0.5 1 0.55]; G.msg_t = 6;
+    if G.chamber == 1
+        G.msg = 'Stepping into Chamber II: The Inferno...';
+        G.msg_col = [1 0.55 0.25]; G.msg_t = 4;
+    else
+        G.msg = 'Inferno Gate conquered! Chamber III awaits in the next chapter.';
+        G.msg_col = [0.5 1 0.55]; G.msg_t = 6;
+    end
 end
+
 G.msg_t = G.msg_t - dt;
 if G.msg_t < 0 && ~G.opening
     G.msg = ''; G.msg_t = 99;
@@ -141,7 +173,6 @@ end
 
 % ------------------------------------------------------------------------
 function draw_frame(ax, S, H, G, t)
-% one frame: scene, camera, text
 update_scene(S, G, t);
 view_set(ax, S, G.view, G);
 P = G.puzzle;
@@ -154,14 +185,13 @@ end
 
 % ------------------------------------------------------------------------
 function on_key(fig, ev)
-% keyboard control
 G = getappdata(fig, 'G');
 key = ev.Key; ch = ev.Character;
-if G.intro                                   % story screen: Enter skips the typing, then starts
+if G.intro
     if strcmp(key, 'escape')
         close(fig); return;
     elseif any(strcmp(key, {'return', 'enter', 'space'}))
-        if G.intro_t * 45 < G.intro_len, G.intro_t = 99; else, G.intro = false; end
+        if G.intro_t * 48 < G.intro_len, G.intro_t = 99; else, G.intro = false; end
     end
     setappdata(fig, 'G', G);
     return;
@@ -184,10 +214,11 @@ switch key
     case 'v'
         G.view = mod(G.view, 3) + 1;
     case 'r'
-        G.puzzle = puzzle_new(); G.input = ''; G.wrong = 0; G.time = 0;
+        G.puzzle = puzzle_new(G.chamber); G.input = ''; G.wrong = 0; G.time = 0;
         G.opening = false; G.at_sign = false;
-        G.px = 0; G.py = -4; G.keys = [0 0 0 0];              % back to the start
-        G.msg = 'A new riddle forms and the gate seals itself again. Return to the sign.'; G.msg_col = [1 0.85 0.5]; G.msg_t = 4;
+        G.px = 0; G.py = -4; G.keys = [0 0 0 0];
+        G.msg = 'A new riddle forms and the gate seals itself again. Return to the sign.';
+        G.msg_col = [1 0.85 0.5]; G.msg_t = 4;
     case 'p'
         G.shot = 'screenshot';
     otherwise
@@ -200,7 +231,6 @@ end
 
 % ------------------------------------------------------------------------
 function on_release(fig, ev)
-% stop walking when a movement key is released
 G = getappdata(fig, 'G');
 switch ev.Key
     case {'uparrow', 'w'},    G.keys(1) = 0;
@@ -225,8 +255,8 @@ elseif v == G.puzzle.answer
     pts = max(100, 500 - 50 * G.wrong);
     G.tries = G.tries + 1; G.score = G.score + pts;
     G.opening = true; G.wrong = 0;
-    G.msg = sprintf('The seal breaks!  +%d glory.  The old stone remembers you.', pts); G.msg_col = [0.5 1 0.55];
-    G.msg_t = 99;
+    G.msg = sprintf('The seal breaks!  +%d glory.  The old stone remembers you.', pts);
+    G.msg_col = [0.5 1 0.55]; G.msg_t = 99;
 else
     G.wrong = G.wrong + 1; G.tries = G.tries + 1; G.shake_t = 1; G.input = '';
     G.msg = 'The gate stays silent. Think again, seeker.';
@@ -246,7 +276,6 @@ end
 
 % ------------------------------------------------------------------------
 function make_screenshots(fig, ax, S, H, here)
-% save the M2 screenshots: closed, bolt sliding, half open, open, two map views
 d = fullfile(here, 'screenshots');
 if ~exist(d, 'dir'), mkdir(d); end
 G = getappdata(fig, 'G');

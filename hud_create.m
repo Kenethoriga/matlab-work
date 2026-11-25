@@ -1,6 +1,6 @@
 function H = hud_create(fig)
 % HUD_CREATE  Sleek ancient carved-stone & gold temple HUD with gradient
-%             tablet dialogue box, soft drop shadow, and custom input slot.
+%             tablet dialogue box, Chamber I & II stories, and gold key guide.
 
     gold   = [0.96 0.80 0.44];
     goldD  = [0.55 0.42 0.19];
@@ -86,18 +86,12 @@ function H = hud_create(fig)
     cx = x0 + w / 2;
     P  = gobjects(1, 0);
 
-    % Soft drop shadow
     P(end+1) = tablet(H.ax, x0 + 0.005, y0 - 0.009, w, h, 0.012, [0 0 0], 0.45, 'none', 0.5);
-
-    % Main dark-stone tablet with subtle warm top-to-bottom gradient
     P(end+1) = grad_tablet(H.ax, x0, y0, w, h, 0.012, ...
         [0.13 0.11 0.095], [0.055 0.05 0.05], 0.94, gold * 0.85, 1.5);
-
-    % Fine inner gold border
     P(end+1) = tablet(H.ax, x0 + 0.008, y0 + 0.011, w - 0.016, h - 0.022, ...
         0.008, 'none', 0.0, goldD * 0.8, 0.7);
 
-    % Header: Title, Chamber, Whisper
     H.cHead = text(H.ax, cx, y0 + h - 0.040, '', 'Color', gold, 'FontSize', 12.5, ...
         'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none');
     heads(end+1) = H.cHead; P(end+1) = H.cHead;
@@ -108,13 +102,11 @@ function H = hud_create(fig)
     H.cWhisper = text(H.ax, cx, y0 + h - 0.102, '', 'Color', [0.82 0.75 0.62], 'FontSize', 8.5, ...
         'FontAngle', 'italic', 'HorizontalAlignment', 'center', 'Interpreter', 'none'); P(end+1) = H.cWhisper;
 
-    % Ornamental divider
     yd = y0 + h - 0.128;
     P(end+1) = line(H.ax, [x0 + 0.024, cx - 0.016], [yd yd], 'Color', goldD, 'LineWidth', 0.9);
     P(end+1) = line(H.ax, [cx + 0.016, x0 + w - 0.024], [yd yd], 'Color', goldD, 'LineWidth', 0.9);
     P(end+1) = diamond(H.ax, cx, yd, 0.006, 0.010, gold, gold);
 
-    % Question Section (Equations + Ask)
     H.cA = text(H.ax, cx, y0 + 0.285, '', 'Color', [0.99 0.97 0.93], 'FontSize', 17.5, ...
         'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none'); P(end+1) = H.cA;
     H.cB = text(H.ax, cx, y0 + 0.236, '', 'Color', [0.99 0.97 0.93], 'FontSize', 17.5, ...
@@ -122,7 +114,6 @@ function H = hud_create(fig)
     H.cAsk = text(H.ax, cx, y0 + 0.186, '', 'Color', gold * 0.95, 'FontSize', 10.5, ...
         'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none'); P(end+1) = H.cAsk;
 
-    % Answer Input Section (Label + Clean Recessed Input Box)
     P(end+1) = text(H.ax, cx, y0 + 0.146, 'TYPE ANSWER  &  PRESS ENTER', ...
         'Color', [0.65 0.78 0.85], 'FontSize', 7.5, 'FontWeight', 'bold', ...
         'HorizontalAlignment', 'center', 'Interpreter', 'none');
@@ -133,7 +124,6 @@ function H = hud_create(fig)
     H.cAns = text(H.ax, cx, y0 + 0.100, '', 'Color', [1 1 1], 'FontSize', 18, ...
         'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none'); P(end+1) = H.cAns;
 
-    % Hint at bottom
     H.cHint = text(H.ax, cx, y0 + 0.034, '', 'Color', [0.95 0.80 0.48], 'FontSize', 8.3, ...
         'FontAngle', 'italic', 'HorizontalAlignment', 'center', 'Interpreter', 'none'); P(end+1) = H.cHint;
 
@@ -152,7 +142,7 @@ function H = hud_create(fig)
         'HorizontalAlignment', 'center', 'Interpreter', 'none');
     heads(end+1) = H.help;
 
-    %% 9. Story Opening Screen
+    %% 9. Story Opening Screens (Chamber I & Chamber II)
     nl = char(10);
     H.storyText = ['Long ago, the mathematicians of the Rift built a temple of stone' nl ...
         'and sealed every chamber behind a gate that listens for one thing:' nl ...
@@ -161,6 +151,13 @@ function H = hud_create(fig)
         'into the dark. Somewhere beyond three sealed gates lies the' nl ...
         'Crystal of Zero, the first number ever written.' nl nl ...
         'Walk to each sign, solve its puzzle, and the temple will let you pass.'];
+
+    H.storyText2 = ['Beyond the Gate of Direction, the stone grows blistering hot.' nl ...
+        'You descend into the Inferno — a volcanic rift where rivers of' nl ...
+        'molten fire carve through blackened obsidian.' nl nl ...
+        'Ahead stands the Iron Gate of the Crucible. Its molten seal' nl ...
+        'demands the determinant of a 2x2 matrix to break.' nl nl ...
+        'Cross the diagonals, subtract with care, and claim the second seal.'];
 
     I = gobjects(1, 0);
     I(end+1) = rectp(H.ax, 0, 0, 1, 1, [0.012 0.010 0.015], 0.95, 'none');
