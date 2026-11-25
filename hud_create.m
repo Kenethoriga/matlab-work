@@ -1,5 +1,6 @@
 function H = hud_create(fig)
-% HUD_CREATE  High-contrast ancient carved-stone & gold temple HUD.
+% HUD_CREATE  High-contrast ancient carved-stone & gold temple HUD with
+%             gilded manuscript scroll story screens for Chamber I & II.
 
     gold      = [0.98 0.83 0.46];
     goldD     = [0.62 0.48 0.22];
@@ -143,7 +144,7 @@ function H = hud_create(fig)
         'HorizontalAlignment', 'center', 'Interpreter', 'none');
     heads(end+1) = H.help;
 
-    %% 9. Story Opening Screens (Chamber I & Chamber II — Rich Temple Scroll)
+    %% 9. Story Opening Screens (Chamber I & Chamber II — Gilded Ancient Scroll)
     nl = char(10);
     H.storyText = ['Long ago, the mathematicians of the Rift built a temple of stone' nl ...
         'and sealed every chamber behind a gate that listens for one thing:' nl ...
@@ -194,12 +195,22 @@ function H = hud_create(fig)
         'HorizontalAlignment', 'center', 'Interpreter', 'none');
     heads(end+1) = H.introSub;
 
-    % Recessed inner stone scroll tablet for the story body
-    I(end+1) = grad_tablet(H.ax, 0.135, 0.245, 0.730, 0.455, 0.014, ...
-        [0.12 0.10 0.088], [0.065 0.055 0.052], 0.95, goldD * 0.9, 1.1);
+    % Ornate recessed inner stone scroll tablet with filigree accents
+    I(end+1) = grad_tablet(H.ax, 0.095, 0.225, 0.810, 0.480, 0.016, ...
+        [0.13 0.105 0.085], [0.055 0.045 0.042], 0.96, gold * 0.85, 1.3);
+    I(end+1) = tablet(H.ax, 0.105, 0.238, 0.790, 0.454, 0.012, 'none', 0, goldD * 0.7, 0.7);
+    I(end+1) = line(H.ax, [0.30 0.70], [0.680 0.680], 'Color', goldD * 0.75, 'LineWidth', 0.8);
+    I(end+1) = line(H.ax, [0.30 0.70], [0.252 0.252], 'Color', goldD * 0.75, 'LineWidth', 0.8);
+    I(end+1) = diamond(H.ax, 0.5, 0.680, 0.005, 0.009, gold, gold);
+    I(end+1) = diamond(H.ax, 0.5, 0.252, 0.005, 0.009, gold, gold);
 
-    H.introBody = text(H.ax, 0.5, 0.655, '', 'Color', parchment, 'FontSize', 15, ...
-        'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', 'Interpreter', 'none');
+    % Embossed ancient-manuscript story text (drop shadow + warm parchment)
+    H.introBodySh = text(H.ax, 0.502, 0.652, '', 'Color', [0.02 0.01 0.01], 'FontSize', 17.5, ...
+        'FontAngle', 'italic', 'HorizontalAlignment', 'center', ...
+        'VerticalAlignment', 'top', 'Interpreter', 'none');
+    H.introBody = text(H.ax, 0.500, 0.655, '', 'Color', [0.98 0.91 0.74], 'FontSize', 17.5, ...
+        'FontAngle', 'italic', 'HorizontalAlignment', 'center', ...
+        'VerticalAlignment', 'top', 'Interpreter', 'none');
 
     % Styled "Press Enter" button pill at bottom
     I(end+1) = grad_tablet(H.ax, 0.30, 0.125, 0.40, 0.072, 0.008, ...
@@ -209,20 +220,25 @@ function H = hud_create(fig)
         'HorizontalAlignment', 'center', 'Interpreter', 'none');
     heads(end+1) = H.introHint;
 
-    H.intro = [I, H.introTitleSh, H.introTitle, H.introSub, H.introBody, H.introHint];
+    H.intro = [I, H.introTitleSh, H.introTitle, H.introSub, H.introBodySh, H.introBody, H.introHint];
     set(H.intro, 'Visible', 'off');
 
-    %% 10. Crisp Ancient Temple Typography (no thin Garamond)
+    %% 10. Ancient Temple & Manuscript Typography
     try
         fonts = listfonts;
         ancient = pickfont(fonts, { ...
-            'Cinzel', 'Trajan Pro', 'Georgia', 'Palatino Linotype', 'Book Antiqua', 'Times New Roman'});
+            'Cinzel', 'Trajan Pro', 'Copperplate Gothic Bold', 'Palatino Linotype', 'Georgia'});
+        scrollFont = pickfont(fonts, { ...
+            'Palatino Linotype', 'Book Antiqua', 'Georgia', 'Times New Roman'});
         bodySerif = pickfont(fonts, { ...
-            'Georgia', 'Palatino Linotype', 'Cambria', 'Book Antiqua', 'Times New Roman'});
+            'Georgia', 'Palatino Linotype', 'Cambria', 'Times New Roman'});
 
         t = findall(H.ax, 'Type', 'text');
-        if ~isempty(bodySerif), set(t, 'FontName', bodySerif); end
-        if ~isempty(ancient),   set(heads(ishandle(heads)), 'FontName', ancient); end
+        if ~isempty(bodySerif),  set(t, 'FontName', bodySerif); end
+        if ~isempty(ancient),    set(heads(ishandle(heads)), 'FontName', ancient); end
+        if ~isempty(scrollFont)
+            set([H.introBody, H.introBodySh], 'FontName', scrollFont);
+        end
     catch
     end
 end

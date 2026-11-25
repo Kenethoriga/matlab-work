@@ -101,6 +101,35 @@ function S = build_chamber2(ax, lite)
     end
     S.volcano = mesh_patch(ax, Volc, 'flat', 0.10);
 
+
+    %% 3b. Volcano Eruption Fountain, Lava Bombs & Crater Flash Light
+    S.erupt.origin = [0, 21.0, 9.6];
+
+    % Molten lava jet shooting up from the crater
+    [Vj, Fj] = prim_revolve([0 0; 1.15 0; 0.85 1.8; 1.45 3.6; 0.65 5.2; 0 6.2], 14);
+    tj = (Vj(:, 3) - min(Vj(:, 3))) / max(1e-6, max(Vj(:, 3)) - min(Vj(:, 3)));
+    Cj = [1.00 0.22 0.02] .* (1 - tj) + [1.00 0.92 0.35] .* tj;
+    S.erupt.jetV0 = Vj;
+    S.erupt.jetH  = patch('Parent', ax, 'Vertices', Vj, 'Faces', Fj, ...
+        'FaceVertexCData', Cj, 'FaceColor', 'interp', 'EdgeColor', 'none', ...
+        'FaceLighting', 'none', 'FaceAlpha', 0.92, 'Clipping', 'off');
+
+    % 45 ballistic lava bombs launched from the crater
+    nb = 45;
+    ang = 2 * pi * mod(sin((1:nb) * 12.9898) * 43758.5453, 1);
+    spd = 2.2 + 4.8 * mod(sin((1:nb) * 78.233)  * 43758.5453, 1);
+    S.erupt.vx  = spd .* cos(ang);
+    S.erupt.vy  = spd .* sin(ang);
+    S.erupt.vz  = 8.5 + 6.5 * mod(sin((1:nb) * 37.719) * 43758.5453, 1);
+    S.erupt.ph  = 3.0 * mod(sin((1:nb) * 4.1414) * 43758.5453, 1);
+    S.erupt.bombs = plot3(ax, zeros(1, nb), 21 * ones(1, nb), 10 * ones(1, nb), ...
+        'o', 'MarkerSize', 5.5, 'MarkerFaceColor', [1.0 0.72 0.16], ...
+        'MarkerEdgeColor', [1.0 0.25 0.02]);
+
+    % Overhead crater flash light
+    S.erupt.light = light('Parent', ax, 'Position', [0 21.0 13.0], ...
+        'Style', 'local', 'Color', [1.0 0.38 0.08]);
+
     %% 4. Glowing Portal Beyond the Gate (drawn BEFORE gate & explorer)
     [V, F] = prim_sphere(0.85, 18);
     S.portal = patch('Parent', ax, 'Vertices', mtx_apply(mtx_translate(0, 19, 2.2), V), 'Faces', F, ...

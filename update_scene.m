@@ -1,6 +1,6 @@
 function update_scene(S, G, t)
 % UPDATE_SCENE  Animate gate (3-level hierarchy), torches, crystal, embers,
-%               and lifelike explorer movement (bob, lean, sway, breathing).
+%               lifelike explorer movement, and Chamber II volcano eruption.
 
     %% 1. 3-Level Gate Hierarchy: M_gate * M_leaf * M_bolt
     shake = 0;
@@ -146,5 +146,39 @@ function update_scene(S, G, t)
         z = mod(S.ember.z0 + t * 0.55, 6.2);
         x = S.ember.x0 + 0.25 * sin(t * 1.4 + S.ember.ph);
         set(S.ember.h, 'XData', x, 'YData', S.ember.y0, 'ZData', z);
+    end
+
+    %% 5. Chamber II Volcano Eruption (Lava Fountain + Parabolic Lava Bombs)
+    if isfield(S, 'erupt')
+        E = S.erupt;
+        o = E.origin;
+
+        % Periodic eruption surges (and a massive eruption when the gate opens!)
+        surge = max(0, sin(t * 0.85)).^3;
+        if G.opening, surge = 1.25; end
+        inten = 0.28 + 0.95 * surge;
+
+        % Animate the molten lava fountain shooting out of the crater
+        wScale = 0.65 + 0.55 * inten + 0.08 * sin(t * 16);
+        hScale = 0.25 + 1.15 * inten + 0.12 * sin(t * 21);
+        M_jet  = mtx_translate(o(1), o(2), o(3)) * ...
+                 mtx_rotz(t * 2.2) * mtx_scale(wScale, wScale, hScale);
+        set(E.jetH, 'Vertices', mtx_apply(M_jet, E.jetV0));
+
+        % Animate ballistic lava bombs arching out of the crater under gravity
+        g   = 9.8;
+        tau = mod(t * (0.95 + 0.45 * surge) + E.ph, 2.6);
+        bx  = o(1) + E.vx .* tau;
+        by  = o(2) + E.vy .* tau;
+        bz  = o(3) + (E.vz * (0.75 + 0.45 * inten)) .* tau - 0.5 * g * (tau.^2);
+
+        % Hide bombs once they fall below the lava sea
+        bx(bz < 0.2) = NaN;
+        by(bz < 0.2) = NaN;
+        bz(bz < 0.2) = NaN;
+        set(E.bombs, 'XData', bx, 'YData', by, 'ZData', bz);
+
+        % Flash the volcanic sky light with each eruption surge
+        set(E.light, 'Color', min(1, [1.0 0.40 0.08] * (0.45 + 0.90 * surge)));
     end
 end
