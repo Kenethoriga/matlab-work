@@ -1,9 +1,29 @@
 function P = puzzle_new(chamber)
-% PUZZLE_NEW  Generate a randomized math riddle for Chamber 1 (Vectors)
-%             or Chamber 2 (2x2 Matrix Determinant).
+% PUZZLE_NEW  Generate a randomized math riddle for Chamber I (Vectors),
+%             Chamber II (2x2 Determinants), or Chamber III (The Void: det = 0).
     if nargin < 1, chamber = 1; end
 
-    if chamber == 2
+    if chamber == 3
+        % Medium mental-math Void puzzle: find x so det(M) = 0 (always a clean integer)
+        k = randi([2, 4]);
+        a = randi([2, 5]);
+        b = a * k;
+        c = randi([2, 5]);
+        ansVal = c * k;
+
+        P.title   = 'CHAMBER III: THE VOID';
+        P.place   = 'The Astral Gate';
+        P.topic   = 'Singularity (det = 0)';
+        P.whisper = '"Balance the diagonals to collapse space to zero."';
+        P.line1   = sprintf('M = [ %2d,  %2d ]', a, b);
+        P.line2   = sprintf('    [ %2d,   x ]', c);
+        P.ask     = 'Find x so  det(M) = 0';
+        P.prefix  = 'x =  ';
+        P.ans     = ansVal;
+        P.answer  = P.ans;
+        P.hint    = sprintf('Hint: %d*x = %d*%d, so x = %d / %d', a, b, c, b * c, a);
+
+    elseif chamber == 2
         a = randi([-6, 6]); b = randi([-6, 6]);
         c = randi([-6, 6]); d = randi([-6, 6]);
         while (a*d - b*c) == 0
@@ -20,6 +40,7 @@ function P = puzzle_new(chamber)
         P.ans     = a * d - b * c;
         P.answer  = P.ans;
         P.hint    = sprintf('Hint: det(M) = (%d*%d) - (%d*%d)', a, d, b, c);
+
     else
         A = randi([-6, 6], 1, 3);
         B = randi([-6, 6], 1, 3);

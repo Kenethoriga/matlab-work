@@ -1,7 +1,7 @@
 function update_scene(S, G, t)
 % UPDATE_SCENE  Animate gate (3-level hierarchy), lifelike explorer + flowing
 %               cape, live flickering torch lights, pulsing portal, breathing
-%               lava, and Chamber II volcano eruption + smoke plumes.
+%               lava, Chamber II volcano eruption, and Chamber III Void.
 
     %% 1. 3-Level Gate Hierarchy: M_gate * M_leaf * M_bolt
     shake = 0;
@@ -220,5 +220,33 @@ function update_scene(S, G, t)
                     'FaceAlpha', 0.28 * (1 - p));
             end
         end
+    end
+
+    %% 6. Chamber III: The Void (Spinning Singularity & Floating Monoliths)
+    if isfield(S, 'void')
+        V = S.void;
+        o = V.origin;
+        spd = 1.0;
+        if G.opening, spd = 2.6; end   % rings accelerate when the seal breaks!
+
+        % 3 counter-rotating tilted accretion rings
+        M1 = mtx_translate(o(1), o(2), o(3)) * mtx_rotx(0.55) * mtx_rotz(t * 0.9 * spd);
+        M2 = mtx_translate(o(1), o(2), o(3)) * mtx_roty(0.75) * mtx_rotz(-t * 1.3 * spd);
+        M3 = mtx_translate(o(1), o(2), o(3)) * mtx_rotx(-0.65) * mtx_roty(0.35) * mtx_rotz(t * 0.6 * spd);
+        set(V.rings(1).h, 'Vertices', mtx_apply(M1, V.rings(1).V0));
+        set(V.rings(2).h, 'Vertices', mtx_apply(M2, V.rings(2).V0));
+        set(V.rings(3).h, 'Vertices', mtx_apply(M3, V.rings(3).V0));
+
+        % Gentle zero-gravity bobbing for surrounding monolith ruins
+        for k = 1:numel(V.ruins)
+            r = V.ruins(k);
+            dz = 0.45 * sin(t * 0.9 + r.ph);
+            M_r = mtx_translate(r.pos(1), r.pos(2), r.pos(3) + dz) * mtx_rotz(0.15 * sin(t * 0.4 + r.ph));
+            set(r.h, 'Vertices', mtx_apply(M_r, r.V0));
+        end
+
+        % Pulsing cosmic singularity light
+        p = 0.75 + 0.25 * sin(t * 2.5);
+        set(V.light, 'Color', min(1, [0.55 0.35 1.00] * p));
     end
 end

@@ -1,5 +1,5 @@
 function hud_update(H, G)
-% HUD_UPDATE  Efficiently refresh the HUD for Chamber I & Chamber II.
+% HUD_UPDATE  Efficiently refresh the HUD for Chamber I, II & III.
 
     P      = G.puzzle;
     solved = G.opening;
@@ -11,11 +11,20 @@ function hud_update(H, G)
     rn  = {'I', 'II', 'III', 'IV'};
     mid = dotchar();
 
-    %% 1. Story Opening Screen (Chamber 1 & Chamber 2)
+    %% 1. Story Opening Screen (Chamber I, II & III)
     vis = 'off'; if G.intro, vis = 'on'; end
     for k = 1:numel(H.intro), setv(H.intro(k), 'Visible', vis); end
     if G.intro
-        if ch == 2 && isfield(H, 'storyText2')
+        if ch == 3 && isfield(H, 'storyText3')
+            txt = H.storyText3;
+            if isfield(H, 'introTitle')
+                setv(H.introTitle,   'String', 'C H A M B E R   I I I  :  T H E   V O I D');
+                setv(H.introTitleSh, 'String', 'C H A M B E R   I I I  :  T H E   V O I D');
+                setv(H.introTitle,   'Color',  [0.65 0.88 1.00]);
+                setv(H.introSub,     'String', ['THE ASTRAL GATE   ' mid '   COLLAPSE TO ZERO']);
+                setv(H.introHint,    'String', 'PRESS  [ENTER]  TO  STEP  INTO  THE  VOID');
+            end
+        elseif ch == 2 && isfield(H, 'storyText2')
             txt = H.storyText2;
             if isfield(H, 'introTitle')
                 setv(H.introTitle,   'String', 'C H A M B E R   I I  :  T H E   I N F E R N O');
@@ -36,6 +45,9 @@ function hud_update(H, G)
         end
         n = min(numel(txt), floor(G.intro_t * 48));
         setv(H.introBody, 'String', txt(1:n));
+        if isfield(H, 'introBodySh')
+            setv(H.introBodySh, 'String', txt(1:n));
+        end
         v = 'off';
         if n >= numel(txt) && mod(floor(G.frame / 22), 2) == 0, v = 'on'; end
         setv(H.introHint, 'Visible', v);

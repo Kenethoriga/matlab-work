@@ -1,5 +1,5 @@
 function run_project(mode)
-% RUN_PROJECT  Math Temple Run - Milestone 2+ (Chambers I & II)
+% RUN_PROJECT  Math Temple Run - Chambers I, II (The Inferno) & III (The Void)
 %
 %   run_project            play the game (type the answer, press Enter)
 %   run_project('lite')    lighter graphics for a slow computer
@@ -57,7 +57,8 @@ while ishandle(fig)
 
     % ---- Smooth Cinematic Transition: Chamber I -> Chamber II (The Inferno) ----
     if G.chamber == 1 && G.opening && G.py >= 14.5
-        [fadeBox, fadeTxt] = fade_out(fig, H, ['CHAMBER II  ' dotchar() '  THE INFERNO']);
+        try_sfx('transition');
+        [fadeBox, fadeTxt] = fade_out(fig, H, ['CHAMBER II  ' dotchar() '  THE INFERNO'], [1.0 0.65 0.25]);
         if ~ishandle(fig), break; end
 
         G.chamber = 2;
@@ -81,7 +82,38 @@ while ishandle(fig)
         setappdata(fig, 'G', G);
         draw_frame(ax, S, H, G, t);
         fade_in(fig, fadeBox, fadeTxt);
-        tprev = toc(t0);   % reset dt after transition pause
+        tprev = toc(t0);
+        continue;
+    end
+
+    % ---- Smooth Cinematic Transition: Chamber II -> Chamber III (The Void) ----
+    if G.chamber == 2 && G.opening && G.py >= 14.5
+        try_sfx('transition');
+        [fadeBox, fadeTxt] = fade_out(fig, H, ['CHAMBER III  ' dotchar() '  THE VOID'], [0.62 0.90 1.00]);
+        if ~ishandle(fig), break; end
+
+        G.chamber = 3;
+        cla(ax);
+        S = build_chamber3(ax, lite);
+        G.open_t = 0; G.opening = false; G.at_sign = false;
+        G.input = ''; G.wrong = 0; G.shake_t = 0;
+        G.px = 0; G.py = -3.0; G.heading = 0; G.phase = 0; G.moving = false; G.cheer = false;
+        G.camx = 0; G.camy = -9.5;
+        G.keys = [0 0 0 0];
+        G.puzzle = puzzle_new(3);
+        G.intro = true; G.intro_t = 0;
+        if isfield(H, 'storyText3')
+            G.intro_len = numel(H.storyText3);
+        else
+            G.intro_len = numel(H.storyText);
+        end
+        G.msg = 'Cross the floating stones toward the Astral Gate.';
+        G.msg_col = [0.62 0.90 1.00]; G.msg_t = 99;
+
+        setappdata(fig, 'G', G);
+        draw_frame(ax, S, H, G, t);
+        fade_in(fig, fadeBox, fadeTxt);
+        tprev = toc(t0);
         continue;
     end
 
@@ -111,10 +143,21 @@ if G.intro, G.intro_t = G.intro_t + dt; end
 if ~G.opening && ~G.intro, G.time = G.time + dt; end
 G.cheer = G.opening && G.open_t < 1;
 
-% Smooth follow camera
+% Smooth follow camera with riddle zoom, gate pullback & shake
+tx = 0.6 * G.px;
+ty = G.py - 6.5;
+if G.at_sign && ~G.opening
+    tx = tx + 0.75;   % frame Amani & gate cleanly beside the left riddle tablet
+    ty = ty + 1.10;   % gentle focus zoom
+elseif G.opening && G.open_t < 1
+    ty = ty - 1.45 * sin(pi * G.open_t);  % dramatic pullback as gate opens
+end
 k = min(1, 4 * dt);
-G.camx = G.camx + (0.6 * G.px - G.camx) * k;
-G.camy = G.camy + (G.py - 6.5 - G.camy) * k;
+G.camx = G.camx + (tx - G.camx) * k;
+G.camy = G.camy + (ty - G.camy) * k;
+if G.shake_t > 0
+    G.camx = G.camx + 0.16 * sin(G.frame * 1.9) * G.shake_t;
+end
 
 % Walk the explorer
 d = [G.keys(4) - G.keys(3), G.keys(1) - G.keys(2)];
@@ -129,9 +172,11 @@ if G.moving
     G.phase = G.phase + 9 * dt;
 end
 
-% Keep explorer inside corridor (and on obsidian walkway in Chamber II)
+% Keep explorer inside corridor / bridge / floating stones
 if G.chamber == 2
     G.px = max(-1.65, min(1.65, G.px));
+elseif G.chamber == 3
+    G.px = max(-2.10, min(2.10, G.px));
 else
     G.px = max(-3.8, min(3.8, G.px));
 end
@@ -165,8 +210,11 @@ if G.py > 11 && G.opening && G.msg_t > 50
     if G.chamber == 1
         G.msg = 'Stepping into Chamber II: The Inferno...';
         G.msg_col = [1 0.55 0.25]; G.msg_t = 4;
+    elseif G.chamber == 2
+        G.msg = 'Crossing into Chamber III: The Void...';
+        G.msg_col = [0.62 0.90 1.00]; G.msg_t = 4;
     else
-        G.msg = 'Inferno Gate conquered! Chamber III awaits in the next chapter.';
+        G.msg = 'The Void yields! The Hidden Vault of Zero awaits ahead.';
         G.msg_col = [0.5 1 0.55]; G.msg_t = 6;
     end
 end
@@ -185,10 +233,13 @@ function draw_frame(ax, S, H, G, t)
 update_scene(S, G, t);
 view_set(ax, S, G.view, G);
 P = G.puzzle;
-set(S.panelText(1), 'String', P.title);
-set(S.panelText(2), 'String', P.line1);
-set(S.panelText(3), 'String', P.line2);
-set(S.panelText(4), 'String', P.ask);
+if isfield(S, 'panelText') && numel(S.panelText) >= 4
+    ttl = P.place; if isfield(P, 'title'), ttl = P.title; end
+    set(S.panelText(1), 'String', ttl);
+    set(S.panelText(2), 'String', P.line1);
+    set(S.panelText(3), 'String', P.line2);
+    set(S.panelText(4), 'String', P.ask);
+end
 hud_update(H, G);
 end
 
@@ -266,19 +317,30 @@ elseif v == G.puzzle.answer
     G.opening = true; G.wrong = 0;
     G.msg = sprintf('The seal breaks!  +%d glory.  The old stone remembers you.', pts);
     G.msg_col = [0.5 1 0.55]; G.msg_t = 99;
+    try_sfx('correct');
+    try_sfx('gate');
 else
     G.wrong = G.wrong + 1; G.tries = G.tries + 1; G.shake_t = 1; G.input = '';
     G.msg = 'The gate stays silent. Think again, seeker.';
     if G.wrong >= 2, G.msg = 'Still silent. A faint voice offers a clue below.'; end
     G.msg_col = [1 0.4 0.35]; G.msg_t = 5;
+    try_sfx('wrong');
 end
 end
 
 % ------------------------------------------------------------------------
-function [boxH, txtH] = fade_out(fig, H, label)
+function try_sfx(kind)
+    if exist('sfx_play', 'file') == 2
+        sfx_play(kind);
+    end
+end
+
+% ------------------------------------------------------------------------
+function [boxH, txtH] = fade_out(fig, H, label, col)
+    if nargin < 4, col = [1.0 0.72 0.28]; end
     boxH = patch('Parent', H.ax, 'XData', [0 1 1 0], 'YData', [0 0 1 1], ...
         'FaceColor', [0.02 0.01 0.01], 'FaceAlpha', 0, 'EdgeColor', 'none', 'HitTest', 'off');
-    txtH = text(H.ax, 0.5, 0.5, label, 'Color', [1.0 0.72 0.28], 'FontSize', 22, ...
+    txtH = text(H.ax, 0.5, 0.5, label, 'Color', col, 'FontSize', 22, ...
         'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none', 'Visible', 'off');
     for a = linspace(0, 1, 18)
         if ~ishandle(fig), return; end
