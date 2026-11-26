@@ -1,6 +1,6 @@
 function S = build_explorer(ax, S)
-% BUILD_EXPLORER  Build the upgraded hero explorer (Amani) with cape, vest,
-%                 feathered hat, layered hair, bracers, and cuffed boots.
+% BUILD_EXPLORER  Build the upgraded hero explorer (Amani) with animated cape,
+%                 vest, feathered hat, layered hair, bracers, and cuffed boots.
 %                 Keeps exact joint hierarchy for update_scene.m.
 
     % Rich adventurer palette
@@ -30,16 +30,12 @@ function S = build_explorer(ax, S)
     [V, F] = prim_revolve([0 0; 0.25 0; 0.28 -0.18; 0 -0.18], 16);
     B = mesh_add(B, V, F, tunic * 0.92, mtx_translate(0, 0, 0.94) * mtx_scale(1.02, 0.72, 1.0));
 
-    %% Crimson Scarf & Flowing Explorer Cape
+    %% Crimson Scarf & Collar Clasp
     [V, F] = prim_cylinder(0.21, 0.11, 16);
     B = mesh_add(B, V, F, scarf, mtx_translate(0, 0, 1.56) * mtx_scale(1.06, 0.86, 1.0));
     B = add_box(B, [0 0.175 1.48], [0.13 0.05 0.22], scarf * 0.90);
     [V, F] = prim_sphere(0.045, 10);
     B = mesh_add(B, V, F, gold, mtx_translate(0, 0.21, 1.54)); % gold collar clasp
-
-    % Draped cape flowing behind backpack
-    B = add_box(B, [0 -0.22 1.12], [0.46 0.04 0.82], scarf * 0.88);
-    B = add_box(B, [0 -0.225 0.72], [0.48 0.045 0.05], gold * 0.9); % gold cape hem
 
     %% Leather Belt, Gold Buckle & Glowing Hip Compass
     [V, F] = prim_cylinder(0.275, 0.12, 16);
@@ -76,17 +72,17 @@ function S = build_explorer(ax, S)
     B = mesh_add(B, V, F, skin * 0.90, mtx_translate(0, 0.232, 1.83));
 
     %% Stylish Feathered Explorer Hat with Cyan Gem Brooch
-    [V, F] = prim_cylinder(0.42, 0.04, 24);
-    B = mesh_add(B, V, F, hatCol, mtx_translate(0, 0, 2.04) * mtx_scale(1.0, 1.08, 1.0));
+    [V, F] = prim_cylinder(0.36, 0.04, 24);
+    B = mesh_add(B, V, F, hatCol, mtx_translate(0, -0.02, 2.08) * mtx_scale(1.0, 1.05, 1.0));
     [V, F] = prim_sphere(0.245, 18);
-    B = mesh_add(B, V, F, hatCol, mtx_translate(0, 0, 2.06) * mtx_scale(0.98, 1.02, 0.82));
+    B = mesh_add(B, V, F, hatCol, mtx_translate(0, -0.02, 2.10) * mtx_scale(0.98, 1.02, 0.82));
     [V, F] = prim_cylinder(0.256, 0.068, 20);
-    B = mesh_add(B, V, F, gold, mtx_translate(0, 0, 2.075));
+    B = mesh_add(B, V, F, gold, mtx_translate(0, -0.02, 2.11));
     [V, F] = prim_sphere(0.042, 10);
-    B = mesh_add(B, V, F, gemCyan, mtx_translate(0.23, 0.11, 2.08)); % gem brooch
+    B = mesh_add(B, V, F, gemCyan, mtx_translate(0.23, 0.09, 2.115)); % gem brooch
     % Tapered crimson-and-gold feather
-    B = add_box(B, [0.24 -0.02 2.22], [0.03 0.09 0.22], scarf);
-    B = add_box(B, [0.25 -0.05 2.34], [0.025 0.06 0.12], gold);
+    B = add_box(B, [0.24 -0.04 2.25], [0.03 0.09 0.22], scarf);
+    B = add_box(B, [0.25 -0.07 2.37], [0.025 0.06 0.12], gold);
 
     %% Detailed Leather Backpack & Bedroll
     B = add_box(B, [0 -0.32 1.24], [0.40 0.18 0.50], leather);
@@ -99,6 +95,13 @@ function S = build_explorer(ax, S)
     S.char.body     = mkpart(ax, B, 'gouraud', 0.24);
     S.char.hip      = [0.15 0 0.84];  S.char.knee  = [0 0 0.43];
     S.char.shoulder = [0.30 0 1.50];  S.char.elbow = [0 0 1.20];
+
+    %% Animated Flowing Cape (separate child part pivoting from shoulders)
+    Cp = empty_mesh();
+    Cp = add_box(Cp, [0 -0.22 1.12], [0.46 0.04 0.82], scarf * 0.88);
+    Cp = add_box(Cp, [0 -0.225 0.72], [0.48 0.045 0.05], gold * 0.9); % gold cape hem
+    S.char.cape      = mkpart(ax, Cp, 'gouraud', 0.18);
+    S.char.capePivot = [0 -0.22 1.52];
 
     %% Articulated Limbs (Thigh -> Shin; Upper Arm -> Forearm)
     for sd = [-1 1]

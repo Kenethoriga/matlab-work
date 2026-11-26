@@ -1,6 +1,7 @@
 function update_scene(S, G, t)
-% UPDATE_SCENE  Animate gate (3-level hierarchy), torches, crystal, embers,
-%               lifelike explorer movement, and Chamber II volcano eruption.
+% UPDATE_SCENE  Animate gate (3-level hierarchy), lifelike explorer + flowing
+%               cape, live flickering torch lights, pulsing portal, breathing
+%               lava, and Chamber II volcano eruption + smoke plumes.
 
     %% 1. 3-Level Gate Hierarchy: M_gate * M_leaf * M_bolt
     shake = 0;
@@ -38,10 +39,9 @@ function update_scene(S, G, t)
         set(S.gateLight, 'Color', [0 0 0]);
     end
 
-    %% 2. Lifelike Explorer Movement (Fixed Forward Elbows & Outward Arm Swing)
+    %% 2. Lifelike Explorer Movement + Flowing Cape
     ph = G.phase;
     if G.cheer
-        % Energetic victory hop & arms raised in a V-shape
         bob   = abs(sin(t * 7.5)) * 0.22;
         lean  = -0.05;
         sway  = 0.04 * sin(t * 7.5);
@@ -49,36 +49,45 @@ function update_scene(S, G, t)
         armL  = 2.65 + 0.18 * sin(t * 10);
         armR  = 2.65 - 0.18 * sin(t * 10);
         elbL  = 0.25; elbR = 0.25;
-        splay = 0.30;   % wide V-shape for cheer
+        splay = 0.30;
+        capeAng = -0.30 - 0.12 * sin(t * 9);
     elseif G.moving
-        % Natural athletic stride with bounce, forward lean & hip sway
         bob   = abs(sin(ph)) * 0.085;
         lean  = 0.10;
         sway  = 0.045 * sin(ph);
         hipL  =  0.52 * sin(ph);
         hipR  = -0.52 * sin(ph);
-        kneeL = -max(0, 0.65 * cos(ph));    % knee bends backward
+        kneeL = -max(0, 0.65 * cos(ph));
         kneeR = -max(0, -0.65 * cos(ph));
-        armL  = -0.48 * sin(ph);            % swings opposite to left leg
-        armR  =  0.48 * sin(ph);            % swings opposite to right leg
-        elbL  =  0.32 + 0.38 * max(0, -sin(ph));  % bends FORWARD on forward swing
+        armL  = -0.48 * sin(ph);
+        armR  =  0.48 * sin(ph);
+        elbL  =  0.32 + 0.38 * max(0, -sin(ph));
         elbR  =  0.32 + 0.38 * max(0,  sin(ph));
-        splay =  0.14;  % slight outward clearance from cape/hips
+        splay =  0.14;
+        capeAng = -0.26 - 0.10 * sin(ph * 2);   % billows back while running
     else
-        % Subtle idle breathing & relaxed arms
         bob   = 0.020 * sin(t * 2.6);
         lean  = 0;
         sway  = 0.010 * sin(t * 1.3);
         hipL  = 0; hipR = 0; kneeL = 0; kneeR = 0;
         armL  =  0.04 * sin(t * 2.6);
         armR  = -0.04 * sin(t * 2.6);
-        elbL  =  0.18; elbR = 0.18;         % gentle forward bend at rest
+        elbL  =  0.18; elbR = 0.18;
         splay =  0.10;
+        capeAng = -0.05 - 0.04 * sin(t * 2.8);  % gentle idle ripple
     end
 
     M_root = mtx_translate(G.px, G.py, bob) * mtx_rotz(G.heading) * ...
              mtx_rotx(lean) * mtx_roty(sway);
     set(S.char.body.h, 'Vertices', mtx_apply(M_root, S.char.body.V0));
+
+    % Flowing cape child transform
+    if isfield(S.char, 'cape')
+        cp = S.char.capePivot;
+        M_cape = M_root * mtx_translate(cp(1), cp(2), cp(3)) * ...
+                 mtx_rotx(capeAng) * mtx_translate(-cp(1), -cp(2), -cp(3));
+        set(S.char.cape.h, 'Vertices', mtx_apply(M_cape, S.char.cape.V0));
+    end
 
     % Left & Right Legs and Arms
     hip  = S.char.hip;  knee = S.char.knee;
@@ -118,17 +127,26 @@ function update_scene(S, G, t)
     set(S.shadow.h, 'Vertices', mtx_apply( ...
         mtx_translate(G.px, G.py, 0.03) * mtx_scale(shScale, shScale, 1), S.shadow.V0));
 
-    %% 3. Floating Crystal (Rotate + Bob)
+    %% 3. Floating Crystal & Pulsing Portal Glow
     M_crys = mtx_translate(-2.6, 6.5, 2.0 + 0.22 * sin(t * 2.4)) * mtx_rotz(t * 1.4);
     set(S.crystal.h, 'Vertices', mtx_apply(M_crys, S.crystal.V0));
 
-    %% 4. Flickering Torch Flames & Halos
+    if isfield(S, 'portal') && ishandle(S.portal)
+        gp = 0.85 + 0.15 * sin(t * 4.2);
+        set(S.portal, 'FaceColor', min(1, [1.0 0.86 0.38] * gp));
+    end
+
+    %% 4. Live Flickering Torch Lights, Flames & Halos
     nf = S.flame.n; nv = S.flame.nv;
     Vf = zeros(nf * nv, 3);
     for k = 1:nf
         fl = 0.86 + 0.22 * sin(t * 11 + k * 2.1) + 0.08 * sin(t * 19 + k);
         M_fl = mtx_translate(S.TP(k,1), S.TP(k,2), S.TP(k,3)) * mtx_scale(0.95, 0.95, fl);
         Vf((k-1)*nv + (1:nv), :) = mtx_apply(M_fl, S.flame.V0);
+        if isfield(S, 'torchLights') && k <= numel(S.torchLights) && ishandle(S.torchLights(k))
+            lf = 0.84 + 0.16 * sin(t * 13 + k * 1.9);
+            set(S.torchLights(k), 'Color', [1.0 0.54 0.22] * lf);
+        end
     end
     set(S.flame.h, 'Vertices', Vf);
 
@@ -148,7 +166,15 @@ function update_scene(S, G, t)
         set(S.ember.h, 'XData', x, 'YData', S.ember.y0, 'ZData', z);
     end
 
-    %% 5. Chamber II Volcano Eruption (Lava Fountain + Parabolic Lava Bombs)
+    %% 5. Chamber II: Pulsing Lava Sea, Volcano Eruption & Smoke Plumes
+    if isfield(S, 'lavaC0') && ~S.lite && mod(G.frame, 3) == 0
+        C = S.lavaC0;
+        glow = 0.88 + 0.18 * sin(t * 2.4);
+        C(:, :, 1) = min(1, C(:, :, 1) .* (1 + (glow - 1) * S.lavaMask));
+        C(:, :, 2) = min(1, C(:, :, 2) .* (1 + (glow - 1) * S.lavaMask));
+        set(S.floor, 'CData', C);
+    end
+
     if isfield(S, 'erupt')
         E = S.erupt;
         o = E.origin;
@@ -180,5 +206,19 @@ function update_scene(S, G, t)
 
         % Flash the volcanic sky light with each eruption surge
         set(E.light, 'Color', min(1, [1.0 0.40 0.08] * (0.45 + 0.90 * surge)));
+
+        % Rising volcanic smoke plumes
+        if isfield(E, 'smoke') && ~S.lite
+            for k = 1:numel(E.smoke)
+                p = mod(t * 0.22 + (k - 1) / numel(E.smoke), 1);
+                rad = 1.1 + 2.4 * p;
+                sx = o(1) + 0.9 * sin(t * 0.7 + k * 1.5) * p;
+                sy = o(2) + 0.6 * cos(t * 0.6 + k) * p;
+                sz = o(3) + 1.2 + 8.5 * p;
+                M_sm = mtx_translate(sx, sy, sz) * mtx_scale(rad, rad, rad * 0.72);
+                set(E.smoke(k), 'Vertices', mtx_apply(M_sm, E.smokeV0), ...
+                    'FaceAlpha', 0.28 * (1 - p));
+            end
+        end
     end
 end
