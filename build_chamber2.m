@@ -9,7 +9,7 @@ function S = build_chamber2(ax, lite)
 
     set(ax, 'XLim', [-18 18], 'YLim', [-14 34], 'ZLim', [0 18], ...
         'DataAspectRatio', [1 1 1], 'Projection', 'perspective', ...
-        'Visible', 'off', 'SortMethod', 'childorder', 'Clipping', 'off');
+        'Visible', 'off', 'SortMethod', 'depth', 'Clipping', 'off');
     hold(ax, 'on');
 
     % 6 standing pedestal brazier flame positions lining the obsidian path
@@ -60,6 +60,8 @@ function S = build_chamber2(ax, lite)
 
     S.floor = surf(ax, X, Y, Z, reshape(C, [size(X) 3]), 'FaceColor', 'flat', ...
         'EdgeColor', [0.16 0.03 0.01], 'LineWidth', 0.25, 'FaceLighting', 'none');
+    S.lavaC0   = reshape(C, [size(X) 3]);
+    S.lavaMask = reshape(hot | warm, size(X));
 
     %% 3. Giant Volcano with Lava Streams & Jagged Caldera Peaks
     Volc = empty_mesh();
@@ -101,8 +103,7 @@ function S = build_chamber2(ax, lite)
     end
     S.volcano = mesh_patch(ax, Volc, 'flat', 0.10);
 
-
-    %% 3b. Volcano Eruption Fountain, Lava Bombs & Crater Flash Light
+    %% 3b. Volcano Eruption Fountain, Lava Bombs, Smoke Plumes & Crater Flash Light
     S.erupt.origin = [0, 21.0, 9.6];
 
     % Molten lava jet shooting up from the crater
@@ -129,6 +130,16 @@ function S = build_chamber2(ax, lite)
     % Overhead crater flash light
     S.erupt.light = light('Parent', ax, 'Position', [0 21.0 13.0], ...
         'Style', 'local', 'Color', [1.0 0.38 0.08]);
+
+    % 6 dark volcanic smoke plumes rising above the crater
+    [Vs, Fs] = prim_sphere(1.0, 10);
+    S.erupt.smokeV0 = Vs;
+    S.erupt.smoke   = gobjects(1, 6);
+    for k = 1:6
+        S.erupt.smoke(k) = patch('Parent', ax, 'Vertices', Vs, 'Faces', Fs, ...
+            'FaceColor', [0.12 0.08 0.08], 'EdgeColor', 'none', ...
+            'FaceAlpha', 0.26, 'FaceLighting', 'none', 'Clipping', 'off');
+    end
 
     %% 4. Glowing Portal Beyond the Gate (drawn BEFORE gate & explorer)
     [V, F] = prim_sphere(0.85, 18);
@@ -183,6 +194,9 @@ function S = build_chamber2(ax, lite)
         'FaceColor', 'interp', 'EdgeColor', 'none', 'FaceLighting', 'none', 'Clipping', 'off');
 
     %% 7. Dynamic Lights
+    % Neutral-cool key light so Amani's teal tunic & silhouette pop against the lava
+    light('Parent', ax, 'Position', [0 -6 10], 'Style', 'infinite', 'Color', [0.38 0.42 0.52]);
+
     S.torchLights = gobjects(1, 4);
     for k = 1:4
         S.torchLights(k) = light('Parent', ax, 'Position', TP(k, :) + [0 0 0.4], ...
@@ -326,92 +340,4 @@ end
 function M = add_box(M, c, sz, col)
     [V, F] = prim_box(sz(1), sz(2), sz(3));
     M = mesh_add(M, V, F, col, mtx_translate(c(1), c(2), c(3)));
-end
-
-function p = mkpart(ax, M, lighting, spec)
-    p.V0 = M.V;
-    p.h  = mesh_patch(ax, M, lighting, spec);
-end
-
-function S = add_explorer(ax, S)
-    skin = [0.86 0.64 0.48]; tunic = [0.11 0.36 0.48]; scarf = [0.72 0.14 0.14];
-    pants = [0.24 0.18 0.13]; leather = [0.28 0.16 0.08]; hatCol = [0.30 0.19 0.10];
-    bootCol = [0.14 0.09 0.06]; hairCol = [0.10 0.07 0.05]; gold = [0.85 0.67 0.28];
-
-    B = empty_mesh();
-    [V, F] = prim_capsule(0.25, 0.28, 16);
-    B = mesh_add(B, V, F, tunic, mtx_translate(0, 0, 1.22) * mtx_scale(1.02, 0.68, 1.0));
-    [V, F] = prim_cylinder(0.20, 0.10, 16);
-    B = mesh_add(B, V, F, scarf, mtx_translate(0, 0, 1.57) * mtx_scale(1.05, 0.85, 1.0));
-    B = add_box(B, [0 0.16 1.48], [0.14 0.06 0.24], scarf * 0.92);
-    [V, F] = prim_cylinder(0.275, 0.13, 16);
-    B = mesh_add(B, V, F, leather, mtx_translate(0, 0, 0.93) * mtx_scale(1.02, 0.70, 1.0));
-    B = add_box(B, [0 0.195 0.93], [0.13 0.04 0.11], gold);
-    B = add_box(B, [0 0.175 1.24], [0.06 0.04 0.62], leather * 1.1);
-    [V, F] = prim_sphere(0.24, 18);
-    B = mesh_add(B, V, F, skin, mtx_translate(0, 0, 1.84));
-    [V, F] = prim_sphere(0.245, 16);
-    B = mesh_add(B, V, F, hairCol, mtx_translate(0, -0.04, 1.88) * mtx_scale(1.0, 0.95, 0.85));
-    for sd = [-1 1]
-        [V, F] = prim_sphere(0.036, 10);
-        B = mesh_add(B, V, F, [0.07 0.05 0.04], mtx_translate(sd*0.085, 0.215, 1.87));
-        B = add_box(B, [sd*0.085 0.22 1.92], [0.065 0.02 0.018], hairCol);
-    end
-    [V, F] = prim_sphere(0.03, 8);
-    B = mesh_add(B, V, F, skin * 0.92, mtx_translate(0, 0.235, 1.82));
-    [V, F] = prim_cylinder(0.40, 0.045, 22);
-    B = mesh_add(B, V, F, hatCol, mtx_translate(0, 0, 2.04));
-    [V, F] = prim_sphere(0.245, 16);
-    B = mesh_add(B, V, F, hatCol, mtx_translate(0, 0, 2.05) * mtx_scale(1, 1, 0.78));
-    [V, F] = prim_cylinder(0.258, 0.065, 18);
-    B = mesh_add(B, V, F, gold, mtx_translate(0, 0, 2.065));
-    B = add_box(B, [0.24 -0.04 2.20], [0.03 0.08 0.24], scarf);
-    B = add_box(B, [0 -0.28 1.24], [0.42 0.20 0.54], leather);
-    B = add_box(B, [-0.12 -0.39 1.36], [0.06 0.03 0.10], gold);
-    B = add_box(B, [ 0.12 -0.39 1.36], [0.06 0.03 0.10], gold);
-    [V, F] = prim_cylinder(0.09, 0.52, 12);
-    B = mesh_add(B, V, F, [0.62 0.56 0.42], mtx_translate(0, -0.28, 1.56) * mtx_roty(pi/2));
-
-    S.char.body     = mkpart(ax, B, 'gouraud', 0.22);
-    S.char.hip      = [0.15 0 0.84];  S.char.knee  = [0 0 0.43];
-    S.char.shoulder = [0.30 0 1.50];  S.char.elbow = [0 0 1.20];
-
-    for sd = [-1 1]
-        nm = 'R'; if sd < 0, nm = 'L'; end
-        T = empty_mesh();
-        [V, F] = prim_capsule(0.115, 0.28, 12);
-        T = mesh_add(T, V, F, pants, mtx_translate(sd*0.15, 0, 0.63));
-        S.char.(['thigh' nm]) = mkpart(ax, T, 'gouraud', 0.12);
-
-        T = empty_mesh();
-        [V, F] = prim_capsule(0.10, 0.24, 12);
-        T = mesh_add(T, V, F, bootCol * 1.25, mtx_translate(sd*0.15, 0, 0.25));
-        [V, F] = prim_cylinder(0.112, 0.06, 12);
-        T = mesh_add(T, V, F, gold * 0.85, mtx_translate(sd*0.15, 0, 0.36));
-        T = add_box(T, [sd*0.15 0.07 0.06], [0.20 0.36 0.12], bootCol);
-        S.char.(['shin' nm]) = mkpart(ax, T, 'gouraud', 0.20);
-
-        T = empty_mesh();
-        [V, F] = prim_sphere(0.132, 14);
-        T = mesh_add(T, V, F, tunic * 1.1, mtx_translate(sd*0.29, 0, 1.50));
-        [V, F] = prim_capsule(0.09, 0.20, 12);
-        T = mesh_add(T, V, F, tunic, mtx_translate(sd*0.30, 0, 1.32));
-        [V, F] = prim_sphere(0.085, 10);
-        T = mesh_add(T, V, F, tunic, mtx_translate(sd*0.30, 0, 1.17));
-        S.char.(['uarm' nm]) = mkpart(ax, T, 'gouraud', 0.16);
-
-        T = empty_mesh();
-        [V, F] = prim_capsule(0.075, 0.18, 12);
-        T = mesh_add(T, V, F, skin, mtx_translate(sd*0.30, 0, 1.01));
-        [V, F] = prim_cylinder(0.085, 0.05, 12);
-        T = mesh_add(T, V, F, gold * 0.9, mtx_translate(sd*0.30, 0, 0.93));
-        [V, F] = prim_sphere(0.092, 10);
-        T = mesh_add(T, V, F, leather, mtx_translate(sd*0.30, 0, 0.84));
-        S.char.(['farm' nm]) = mkpart(ax, T, 'gouraud', 0.22);
-    end
-
-    [V, F] = prim_revolve([0 0; 0.5 0; 0.5 0.01; 0 0.01], 20);
-    S.shadow.V0 = V;
-    S.shadow.h  = patch('Parent', ax, 'Vertices', V, 'Faces', F, 'FaceColor', [0 0 0], ...
-        'EdgeColor', 'none', 'FaceAlpha', 0.42, 'FaceLighting', 'none', 'Clipping', 'off');
 end

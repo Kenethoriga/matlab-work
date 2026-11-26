@@ -8,7 +8,7 @@ function S = build_scene(ax, lite)
 
     set(ax, 'XLim', [-5.5 5.5], 'YLim', [-10 23], 'ZLim', [0 7], ...
         'DataAspectRatio', [1 1 1], 'Projection', 'perspective', ...
-        'Visible', 'off', 'SortMethod', 'childorder', 'Clipping', 'off');
+        'Visible', 'off', 'SortMethod', 'depth', 'Clipping', 'off');
     hold(ax, 'on');
 
     TP = [-4.0  1 3.35;  4.0  1 3.35;
@@ -169,6 +169,9 @@ function S = build_scene(ax, lite)
         'FaceColor', 'interp', 'EdgeColor', 'none', 'FaceLighting', 'none', 'Clipping', 'off');
 
     %% 6. Dynamic Lights
+    % Neutral-cool key light so Amani's teal tunic & silhouette pop cleanly
+    light('Parent', ax, 'Position', [0 -6 10], 'Style', 'infinite', 'Color', [0.38 0.42 0.52]);
+
     S.torchLights = gobjects(1, 4);
     for k = 1:4
         S.torchLights(k) = light('Parent', ax, 'Position', TP(k, :) + [0 0 0.3], ...
