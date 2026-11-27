@@ -1,6 +1,6 @@
 function H = hud_create(fig)
 % HUD_CREATE  High-contrast ancient carved-stone & gold temple HUD with
-%             gilded manuscript scroll story screens for Chamber I & II.
+%             gilded manuscript scroll story screens for Chambers I - IV & Victory.
 
     gold      = [0.98 0.83 0.46];
     goldD     = [0.62 0.48 0.22];
@@ -14,16 +14,10 @@ function H = hud_create(fig)
     hold(H.ax, 'on');
     heads = gobjects(0);
 
-    %% 1. Soft Vignette
-    [xx, yy] = meshgrid(linspace(-1, 1, 64), linspace(-1, 1, 36));
-    a = max(0, min(1, (sqrt(xx.^2 * 0.78 + yy.^2 * 1.18) - 0.55) * 0.85));
-    image('Parent', H.ax, 'XData', [0 1], 'YData', [0 1], 'CData', zeros(36, 64, 3), ...
-        'AlphaData', a * 0.72, 'AlphaDataMapping', 'none', 'HitTest', 'off');
-
-    %% 2. Top Ribbon, Bottom Bar & Corner Brackets
-    rectp(H.ax, 0, 0.872, 1, 0.128, dark, 0.78, 'none');
-    rectp(H.ax, 0, 0.922, 1, 0.078, dark, 0.40, 'none');
-    rectp(H.ax, 0, 0,     1, 0.076, dark, 0.82, 'none');
+    %% 1. Top Ribbon, Bottom Bar & Corner Brackets (Opaque for Zero Alpha Lag)
+    rectp(H.ax, 0, 0.872, 1, 0.128, [0.03 0.025 0.032], 1.0, 'none');
+    rectp(H.ax, 0, 0.922, 1, 0.078, [0.022 0.018 0.025], 1.0, 'none');
+    rectp(H.ax, 0, 0,     1, 0.076, dark, 1.0, 'none');
     line(H.ax, [0 1], [0.872 0.872], 'Color', gold * 0.90, 'LineWidth', 1.6);
     line(H.ax, [0 1], [0.865 0.865], 'Color', goldD,       'LineWidth', 0.8);
     line(H.ax, [0 1], [0.076 0.076], 'Color', goldD,       'LineWidth', 1.1);
@@ -33,7 +27,7 @@ function H = hud_create(fig)
     corner(H.ax, 0.008, 0.988,  1, -1, gold * 0.88, 0.036, 0.062);
     corner(H.ax, 0.992, 0.988, -1, -1, gold * 0.88, 0.036, 0.062);
 
-    %% 3. Ancient Carved Title, Subtitle & Quest
+    %% 2. Ancient Carved Title, Subtitle & Quest
     heads(end+1) = text(H.ax, 0.0225, 0.9515, 'M A T H   T E M P L E   R U N', 'Color', [0 0 0], ...
         'FontSize', 17, 'FontWeight', 'bold', 'Interpreter', 'none');
     H.title = text(H.ax, 0.020, 0.954, 'M A T H   T E M P L E   R U N', 'Color', gold, ...
@@ -45,7 +39,7 @@ function H = hud_create(fig)
     H.quest = text(H.ax, 0.020, 0.840, '', 'Color', gold, ...
         'FontSize', 12, 'FontWeight', 'bold', 'Interpreter', 'none');
 
-    %% 4. Chamber Seals (Top Center — high-contrast stone & Roman numerals)
+    %% 3. Chamber Seals (Top Center)
     H.pip = gobjects(1, 4);
     px = [0.425 0.475 0.525 0.575];
     rn = {'I', 'II', 'III', 'IV'};
@@ -58,7 +52,7 @@ function H = hud_create(fig)
         'Color', [0.88 0.80 0.64], 'FontSize', 8.8, 'FontWeight', 'bold', ...
         'HorizontalAlignment', 'center', 'Interpreter', 'none');
 
-    %% 5. Score, Stats & Camera Label
+    %% 4. Score, Stats & Camera Label
     H.score = text(H.ax, 0.98, 0.953, '', 'Color', [1.0 0.90 0.52], 'FontSize', 16.5, ...
         'FontWeight', 'bold', 'HorizontalAlignment', 'right', 'Interpreter', 'none');
     heads(end+1) = H.score;
@@ -67,7 +61,7 @@ function H = hud_create(fig)
     H.view  = text(H.ax, 0.98, 0.102, '', 'Color', cyan, 'FontSize', 10.5, ...
         'FontWeight', 'bold', 'HorizontalAlignment', 'right', 'Interpreter', 'none');
 
-    %% 6. Message & "Seal Broken" Banners
+    %% 5. Message & "Seal Broken" Banners
     H.msg = text(H.ax, 0.5, 0.80, '', 'Color', parchment, 'FontSize', 13, 'FontWeight', 'bold', ...
         'HorizontalAlignment', 'center', 'Interpreter', 'none', 'BackgroundColor', [0.07 0.06 0.05], ...
         'EdgeColor', gold * 0.85, 'Margin', 9, 'LineWidth', 1.3, 'Visible', 'off');
@@ -83,14 +77,14 @@ function H = hud_create(fig)
         'Color', parchment, 'FontSize', 12.5, 'FontWeight', 'bold', 'HorizontalAlignment', 'center', ...
         'Interpreter', 'none', 'BackgroundColor', [0.07 0.06 0.05], 'EdgeColor', gold * 0.80, 'Margin', 9, 'LineWidth', 1.3);
 
-    %% 7. Clean Ancient Question & Answer Dialogue Box (Left Panel)
+    %% 6. Clean Ancient Question & Answer Dialogue Box (Left Panel)
     x0 = 0.022; y0 = 0.108; w = 0.296; h = 0.472;
     cx = x0 + w / 2;
     P  = gobjects(1, 0);
 
-    P(end+1) = tablet(H.ax, x0 + 0.005, y0 - 0.009, w, h, 0.012, [0 0 0], 0.50, 'none', 0.5);
+    P(end+1) = tablet(H.ax, x0 + 0.005, y0 - 0.009, w, h, 0.012, [0.015 0.012 0.012], 1.0, 'none', 0.5);
     P(end+1) = grad_tablet(H.ax, x0, y0, w, h, 0.012, ...
-        [0.14 0.12 0.10], [0.055 0.05 0.05], 0.96, gold * 0.90, 1.6);
+        [0.14 0.12 0.10], [0.055 0.05 0.05], 1.0, gold * 0.90, 1.6);
     P(end+1) = tablet(H.ax, x0 + 0.008, y0 + 0.011, w - 0.016, h - 0.022, ...
         0.008, 'none', 0.0, goldD * 0.85, 0.8);
 
@@ -121,7 +115,7 @@ function H = hud_create(fig)
         'HorizontalAlignment', 'center', 'Interpreter', 'none');
 
     P(end+1) = grad_tablet(H.ax, x0 + 0.024, y0 + 0.066, w - 0.048, 0.066, 0.006, ...
-        [0.03 0.055 0.08], [0.06 0.10 0.14], 0.97, cyan * 0.95, 1.6);
+        [0.03 0.055 0.08], [0.06 0.10 0.14], 1.0, cyan * 0.95, 1.6);
 
     H.cAns = text(H.ax, cx, y0 + 0.099, '', 'Color', [1.0 0.98 0.92], 'FontSize', 18.5, ...
         'FontWeight', 'bold', 'HorizontalAlignment', 'center', 'Interpreter', 'none'); P(end+1) = H.cAns;
@@ -131,7 +125,7 @@ function H = hud_create(fig)
 
     H.cardParts = P;
 
-    %% 8. Fancy Carved-Gold Bottom Key Guide
+    %% 7. Fancy Carved-Gold Bottom Key Guide
     line(H.ax, [0 1], [0.068 0.068], 'Color', goldD * 0.70, 'LineWidth', 0.7);
     diamond(H.ax, 0.030, 0.036, 0.006, 0.011, gold, goldD);
     diamond(H.ax, 0.970, 0.036, 0.006, 0.011, gold, goldD);
@@ -144,14 +138,14 @@ function H = hud_create(fig)
         'HorizontalAlignment', 'center', 'Interpreter', 'none');
     heads(end+1) = H.help;
 
-    %% 9. Story Opening Screens (Chamber I & Chamber II — Gilded Ancient Scroll)
+    %% 8. Story Opening Screens (Chambers I - IV & Victory Epilogue)
     nl = char(10);
     H.storyText = ['Long ago, the mathematicians of the Rift built a temple of stone' nl ...
         'and sealed every chamber behind a gate that listens for one thing:' nl ...
         'the right answer.' nl nl ...
         'You are Amani, an explorer who followed a torch-lit tunnel' nl ...
-        'into the dark. Somewhere beyond three sealed gates lies the' nl ...
-        'Crystal of Zero, the first number ever written.' nl nl ...
+        'into the dark. Beyond four sealed gates lies the Crystal of Zero,' nl ...
+        'the first number ever written.' nl nl ...
         'Walk to each sign, solve its puzzle, and the temple will let you pass.'];
 
     H.storyText2 = ['Beyond the Gate of Direction, the stone grows blistering hot.' nl ...
@@ -168,29 +162,37 @@ function H = hud_create(fig)
         'Find the value of x that collapses the matrix determinant to zero,' nl ...
         'and the path to the Hidden Vault will open.'];
 
-    I = gobjects(1, 0);
-    % Solid dark backdrop (prevents HUD bleed-through)
-    I(end+1) = rectp(H.ax, 0, 0, 1, 1, [0.015 0.012 0.016], 0.99, 'none');
+    H.storyText4 = ['Through the Astral Gate lies the temple''s deepest secret:' nl ...
+        'a luminous cavern of towering cyan crystal spires, mossy' nl ...
+        'ruins, and drifting golden fireflies.' nl nl ...
+        'Before the final Sanctum Gate stands the Fourth Seal.' nl ...
+        'Balance the linear equation on both sides to isolate x,' nl ...
+        'and claim the Crystal of Zero within the Hidden Vault.'];
 
-    % Outer monumental gold frame + corner diamonds
+    H.storyTextWin = ['All four ancient seals have shattered before Amani''s intellect.' nl ...
+        'Vectors, Determinants, Singularities, and Linear Equations' nl ...
+        'yielded their secrets, unveiling the radiant Crystal of Zero.' nl nl ...
+        'The Math Temple remembers your name forever, seeker.'];
+
+    I = gobjects(1, 0);
+    I(end+1) = rectp(H.ax, 0, 0, 1, 1, [0.015 0.012 0.016], 1.0, 'none');
+
     I(end+1) = grad_tablet(H.ax, 0.055, 0.065, 0.890, 0.870, 0.022, ...
-        [0.095 0.078 0.068], [0.032 0.026 0.030], 0.98, gold, 2.2);
+        [0.095 0.078 0.068], [0.032 0.026 0.030], 1.0, gold, 2.2);
     I(end+1) = tablet(H.ax, 0.070, 0.085, 0.860, 0.830, 0.016, 'none', 0, goldD, 0.9);
     I(end+1) = diamond(H.ax, 0.095, 0.880, 0.008, 0.015, gold, gold);
     I(end+1) = diamond(H.ax, 0.905, 0.880, 0.008, 0.015, gold, gold);
     I(end+1) = diamond(H.ax, 0.095, 0.120, 0.008, 0.015, gold, gold);
     I(end+1) = diamond(H.ax, 0.905, 0.120, 0.008, 0.015, gold, gold);
 
-    % Dynamic Title (with drop shadow) & Chapter Subtitle
     H.introTitleSh = text(H.ax, 0.5025, 0.842, 'T H E   T E M P L E   O F   N U M B E R S', ...
-        'Color', [0 0 0], 'FontSize', 25, 'FontWeight', 'bold', ...
+        'Color', [0 0 0], 'FontSize', 22, 'FontWeight', 'bold', ...
         'HorizontalAlignment', 'center', 'Interpreter', 'none');
     H.introTitle = text(H.ax, 0.500, 0.845, 'T H E   T E M P L E   O F   N U M B E R S', ...
-        'Color', gold, 'FontSize', 25, 'FontWeight', 'bold', ...
+        'Color', gold, 'FontSize', 22, 'FontWeight', 'bold', ...
         'HorizontalAlignment', 'center', 'Interpreter', 'none');
     heads(end+1) = H.introTitleSh; heads(end+1) = H.introTitle;
 
-    % Ornamental divider
     I(end+1) = line(H.ax, [0.18 0.455], [0.785 0.785], 'Color', goldD, 'LineWidth', 1.2);
     I(end+1) = line(H.ax, [0.545 0.82], [0.785 0.785], 'Color', goldD, 'LineWidth', 1.2);
     I(end+1) = diamond(H.ax, 0.5, 0.785, 0.012, 0.022, gold, gold);
@@ -202,27 +204,24 @@ function H = hud_create(fig)
         'HorizontalAlignment', 'center', 'Interpreter', 'none');
     heads(end+1) = H.introSub;
 
-    % Ornate recessed inner stone scroll tablet with filigree accents
     I(end+1) = grad_tablet(H.ax, 0.095, 0.225, 0.810, 0.480, 0.016, ...
-        [0.13 0.105 0.085], [0.055 0.045 0.042], 0.96, gold * 0.85, 1.3);
+        [0.13 0.105 0.085], [0.055 0.045 0.042], 1.0, gold * 0.85, 1.3);
     I(end+1) = tablet(H.ax, 0.105, 0.238, 0.790, 0.454, 0.012, 'none', 0, goldD * 0.7, 0.7);
     I(end+1) = line(H.ax, [0.30 0.70], [0.680 0.680], 'Color', goldD * 0.75, 'LineWidth', 0.8);
     I(end+1) = line(H.ax, [0.30 0.70], [0.252 0.252], 'Color', goldD * 0.75, 'LineWidth', 0.8);
     I(end+1) = diamond(H.ax, 0.5, 0.680, 0.005, 0.009, gold, gold);
     I(end+1) = diamond(H.ax, 0.5, 0.252, 0.005, 0.009, gold, gold);
 
-    % Embossed ancient-manuscript story text (drop shadow + warm parchment)
-    H.introBodySh = text(H.ax, 0.502, 0.652, '', 'Color', [0.02 0.01 0.01], 'FontSize', 17.5, ...
+    H.introBodySh = text(H.ax, 0.502, 0.652, '', 'Color', [0.02 0.01 0.01], 'FontSize', 17.0, ...
         'FontAngle', 'italic', 'HorizontalAlignment', 'center', ...
         'VerticalAlignment', 'top', 'Interpreter', 'none');
-    H.introBody = text(H.ax, 0.500, 0.655, '', 'Color', [0.98 0.91 0.74], 'FontSize', 17.5, ...
+    H.introBody = text(H.ax, 0.500, 0.655, '', 'Color', [0.98 0.91 0.74], 'FontSize', 17.0, ...
         'FontAngle', 'italic', 'HorizontalAlignment', 'center', ...
         'VerticalAlignment', 'top', 'Interpreter', 'none');
 
-    % Styled "Press Enter" button pill at bottom
-    I(end+1) = grad_tablet(H.ax, 0.30, 0.125, 0.40, 0.072, 0.008, ...
-        [0.05 0.085 0.11], [0.03 0.05 0.07], 0.96, cyan * 0.85, 1.3);
-    H.introHint = text(H.ax, 0.5, 0.161, 'PRESS  [ENTER]  TO  BEGIN  YOUR  JOURNEY', ...
+    I(end+1) = grad_tablet(H.ax, 0.26, 0.125, 0.48, 0.072, 0.008, ...
+        [0.05 0.085 0.11], [0.03 0.05 0.07], 1.0, cyan * 0.85, 1.3);
+    H.introHint = text(H.ax, 0.5, 0.161, 'PRESS  [ENTER]  OR  [W]  TO  CONTINUE', ...
         'Color', cyan, 'FontSize', 11.5, 'FontWeight', 'bold', ...
         'HorizontalAlignment', 'center', 'Interpreter', 'none');
     heads(end+1) = H.introHint;
@@ -230,7 +229,7 @@ function H = hud_create(fig)
     H.intro = [I, H.introTitleSh, H.introTitle, H.introSub, H.introBodySh, H.introBody, H.introHint];
     set(H.intro, 'Visible', 'off');
 
-    %% 10. Ancient Temple & Manuscript Typography
+    %% 9. Ancient Temple & Manuscript Typography
     try
         fonts = listfonts;
         ancient = pickfont(fonts, { ...

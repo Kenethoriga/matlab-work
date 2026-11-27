@@ -1,5 +1,5 @@
 function hud_update(H, G)
-% HUD_UPDATE  Efficiently refresh the HUD for Chamber I, II & III.
+% HUD_UPDATE  Efficiently refresh the HUD for Chambers I - IV & Victory Epilogue.
 
     P      = G.puzzle;
     solved = G.opening;
@@ -11,46 +11,66 @@ function hud_update(H, G)
     rn  = {'I', 'II', 'III', 'IV'};
     mid = dotchar();
 
-    %% 1. Story Opening Screen (Chamber I, II & III)
-    vis = 'off'; if G.intro, vis = 'on'; end
-    for k = 1:numel(H.intro), setv(H.intro(k), 'Visible', vis); end
+    %% 1. Story Opening Screen (Readable Pace + Stay Until Dismissed)
+    vis = onoff(G.intro);
+    if ~strcmp(get(H.intro(1), 'Visible'), vis)
+        for k = 1:numel(H.intro), set(H.intro(k), 'Visible', vis); end
+    end
+
     if G.intro
-        if ch == 3 && isfield(H, 'storyText3')
+        if ch >= 5 && isfield(H, 'storyTextWin')
+            nl  = char(10);
+            txt = [H.storyTextWin nl nl ...
+                sprintf('Final Glory: %d   %s   Attempts: %d   %s   Time: %d:%02d', ...
+                G.score, mid, G.tries, mid, floor(G.time / 60), floor(mod(G.time, 60)))];
+            setv(H.introTitle,   'String', 'T H E   H I D D E N   V A U L T   U N L O C K E D');
+            setv(H.introTitleSh, 'String', 'T H E   H I D D E N   V A U L T   U N L O C K E D');
+            setv(H.introTitle,   'Color',  [0.98 0.83 0.46]);
+            setv(H.introSub,     'String', ['VICTORY   ' mid '   ALL FOUR SEALS BROKEN']);
+            doneHint = 'PRESS  [ENTER]  TO  PLAY  AGAIN   |   [ESC]  TO  EXIT';
+        elseif ch == 4 && isfield(H, 'storyText4')
+            txt = H.storyText4;
+            setv(H.introTitle,   'String', 'C H A M B E R   I V  :  C R Y S T A L   C A V E R N S');
+            setv(H.introTitleSh, 'String', 'C H A M B E R   I V  :  C R Y S T A L   C A V E R N S');
+            setv(H.introTitle,   'Color',  [0.35 0.92 1.00]);
+            setv(H.introSub,     'String', ['THE HIDDEN VAULT   ' mid '   LINEAR EQUATIONS']);
+            doneHint = 'PRESS  [ENTER]  OR  [W]  TO  ENTER  THE  SANCTUM';
+        elseif ch == 3 && isfield(H, 'storyText3')
             txt = H.storyText3;
-            if isfield(H, 'introTitle')
-                setv(H.introTitle,   'String', 'C H A M B E R   I I I  :  T H E   V O I D');
-                setv(H.introTitleSh, 'String', 'C H A M B E R   I I I  :  T H E   V O I D');
-                setv(H.introTitle,   'Color',  [0.65 0.88 1.00]);
-                setv(H.introSub,     'String', ['THE ASTRAL GATE   ' mid '   COLLAPSE TO ZERO']);
-                setv(H.introHint,    'String', 'PRESS  [ENTER]  TO  STEP  INTO  THE  VOID');
-            end
+            setv(H.introTitle,   'String', 'C H A M B E R   I I I  :  T H E   V O I D');
+            setv(H.introTitleSh, 'String', 'C H A M B E R   I I I  :  T H E   V O I D');
+            setv(H.introTitle,   'Color',  [0.65 0.88 1.00]);
+            setv(H.introSub,     'String', ['THE ASTRAL GATE   ' mid '   COLLAPSE TO ZERO']);
+            doneHint = 'PRESS  [ENTER]  OR  [W]  TO  STEP  INTO  THE  VOID';
         elseif ch == 2 && isfield(H, 'storyText2')
             txt = H.storyText2;
-            if isfield(H, 'introTitle')
-                setv(H.introTitle,   'String', 'C H A M B E R   I I  :  T H E   I N F E R N O');
-                setv(H.introTitleSh, 'String', 'C H A M B E R   I I  :  T H E   I N F E R N O');
-                setv(H.introTitle,   'Color',  [1.00 0.62 0.24]);
-                setv(H.introSub,     'String', ['THE CRUCIBLE OF DETERMINANTS   ' mid '   2x2 MATRICES']);
-                setv(H.introHint,    'String', 'PRESS  [ENTER]  TO  ENTER  THE  INFERNO');
-            end
+            setv(H.introTitle,   'String', 'C H A M B E R   I I  :  T H E   I N F E R N O');
+            setv(H.introTitleSh, 'String', 'C H A M B E R   I I  :  T H E   I N F E R N O');
+            setv(H.introTitle,   'Color',  [1.00 0.62 0.24]);
+            setv(H.introSub,     'String', ['THE CRUCIBLE OF DETERMINANTS   ' mid '   2x2 MATRICES']);
+            doneHint = 'PRESS  [ENTER]  OR  [W]  TO  ENTER  THE  INFERNO';
         else
             txt = H.storyText;
-            if isfield(H, 'introTitle')
-                setv(H.introTitle,   'String', 'T H E   T E M P L E   O F   N U M B E R S');
-                setv(H.introTitleSh, 'String', 'T H E   T E M P L E   O F   N U M B E R S');
-                setv(H.introTitle,   'Color',  [0.98 0.83 0.46]);
-                setv(H.introSub,     'String', ['CHAPTER I   ' mid '   THE GATE OF DIRECTION']);
-                setv(H.introHint,    'String', 'PRESS  [ENTER]  TO  BEGIN  YOUR  JOURNEY');
-            end
+            setv(H.introTitle,   'String', 'T H E   T E M P L E   O F   N U M B E R S');
+            setv(H.introTitleSh, 'String', 'T H E   T E M P L E   O F   N U M B E R S');
+            setv(H.introTitle,   'Color',  [0.98 0.83 0.46]);
+            setv(H.introSub,     'String', ['CHAPTER I   ' mid '   THE GATE OF DIRECTION']);
+            doneHint = 'PRESS  [ENTER]  OR  [W]  TO  BEGIN  YOUR  JOURNEY';
         end
-        n = min(numel(txt), floor(G.intro_t * 48));
+
+        % Calm, readable typewriter speed (38 chars/sec)
+        n = min(numel(txt), max(1, floor(G.intro_t * 38)));
         setv(H.introBody, 'String', txt(1:n));
         if isfield(H, 'introBodySh')
             setv(H.introBodySh, 'String', txt(1:n));
         end
-        v = 'off';
-        if n >= numel(txt) && mod(floor(G.frame / 22), 2) == 0, v = 'on'; end
-        setv(H.introHint, 'Visible', v);
+
+        if n < numel(txt)
+            setv(H.introHint, 'String', 'PRESS  [SPACE]  TO  REVEAL  ALL   |   [ENTER]  TO  START');
+        else
+            setv(H.introHint, 'String', doneHint);
+        end
+        setv(H.introHint, 'Visible', 'on');
         return
     end
 
@@ -63,7 +83,7 @@ function hud_update(H, G)
         quest = 'Quest: Approach the arcane sign';
     end
 
-    setv(H.sub,   'String', ['Chamber ' rn{ch} '  ' mid '  ' P.place]);
+    setv(H.sub,   'String', ['Chamber ' rn{min(ch, 4)} '  ' mid '  ' P.place]);
     setv(H.quest, 'String', quest);
     setv(H.score, 'String', sprintf('GLORY  %d', G.score));
     setv(H.stats, 'String', sprintf('Attempts %d    %s    Time %d:%02d', ...
@@ -74,7 +94,6 @@ function hud_update(H, G)
              ['Camera 3  ' mid '  Side View (Orthographic)']};
     setv(H.view, 'String', names{G.view});
 
-    % Update all 4 Roman-numeral seals
     for k = 1:4
         if k < ch || (k == ch && solved)
             setv(H.pip(k), 'FaceColor', [0.42 0.92 0.52]);
@@ -87,15 +106,17 @@ function hud_update(H, G)
     end
 
     %% 3. Question & Answer Dialogue Box
-    vis = 'off'; if atsign, vis = 'on'; end
-    for k = 1:numel(H.cardParts), setv(H.cardParts(k), 'Visible', vis); end
+    cvis = onoff(atsign);
+    if ~strcmp(get(H.cardParts(1), 'Visible'), cvis)
+        for k = 1:numel(H.cardParts), set(H.cardParts(k), 'Visible', cvis); end
+    end
     if atsign
         topic  = 'Vectors';                     if isfield(P, 'topic'),  topic  = P.topic;  end
         askStr = 'Find the dot product  A . B'; if isfield(P, 'ask'),    askStr = P.ask;    end
         pref   = 'A . B =  ';                   if isfield(P, 'prefix'), pref   = P.prefix; end
 
         setv(H.cHead,    'String', upper(P.place));
-        setv(H.cChamber, 'String', ['Chamber ' rn{ch} '  ' mid '  ' topic]);
+        setv(H.cChamber, 'String', ['Chamber ' rn{min(ch, 4)} '  ' mid '  ' topic]);
         setv(H.cWhisper, 'String', P.whisper);
         setv(H.cA,       'String', P.line1);
         setv(H.cB,       'String', P.line2);
